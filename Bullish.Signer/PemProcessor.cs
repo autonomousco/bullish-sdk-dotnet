@@ -4,13 +4,15 @@ using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Utilities;
 using Org.BouncyCastle.Utilities.Encoders;
 using Org.BouncyCastle.Utilities.IO.Pem;
-using PemReader = Org.BouncyCastle.OpenSsl.PemReader;
+
+// Use the OpenSSL PemReader to for parsing the PEM Object Type (IO.Pem.PemReader doesn't support parsing)
+using PemReader = Org.BouncyCastle.OpenSsl.PemReader; 
 
 namespace Bullish.Signer;
 
 /// <summary>
 /// This is a wrapper class for PemObjects that throws an Exception if an invalid
-/// PEMObject is passed into the constructor.  Once initialized the PemProcessor can be used to
+/// PEMObject is passed into the constructor. Once initialized the PemProcessor can be used to
 /// return the type, DER format, or algorithm used to create the PemObject.
 /// </summary>
 public class PemProcessor
