@@ -1,7 +1,6 @@
 using System.Text;
 using Org.BouncyCastle.Asn1.X9;
 using Org.BouncyCastle.Crypto.Digests;
-using Org.BouncyCastle.Crypto.EC;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Math;
 using Org.BouncyCastle.Utilities;
@@ -32,7 +31,7 @@ public class RequestSigner
     private const int DATA_SEQUENCE_LENGTH_BYTE_POSITION = 2;
 
     private const string SECP256R1 = "secp256r1";
-    private static readonly X9ECParameters CURVE_PARAMS_R1 = CustomNamedCurves.GetByName(SECP256R1);
+    private static X9ECParameters CURVE_PARAMS_R1 => GetEcParameterSpec(); // TODO: Remove this
     private const string ECDSA = "ECDSA";
     private const string R1_KEY_TYPE = "R1";
     private const string PATTERN_STRING_EOS_PREFIX_SIG_R1 = "SIG_R1_";
@@ -50,7 +49,7 @@ public class RequestSigner
 
     public static EosPublicKey DecodePublicKey(string eosAddress)
     {
-        var payload = Base58.Bitcoin.Decode(R1PublicKeyDecoder.AddressWithoutPrefix(eosAddress));
+        var payload = Base58.Bitcoin.Decode(StripKeyPrefix(eosAddress));
 
         var hex = Hex.ToHexString(payload);
         hex = hex.Substring(0, hex.Length - CHECKSUM_LENGTH);
@@ -63,11 +62,9 @@ public class RequestSigner
         if (pointData.Length != 33)
             throw new Exception("PointData Invalid");
 
-        var x9 = R1PublicKeyDecoder.GetEcParameterSpec();
-        var point = x9.Curve.DecodePoint(pointData);
-        var dp = new ECDomainParameters(x9);
+        var dp = GetEcDomainParameters();
 
-        var publicKeyParameters = new ECPublicKeyParameters(point, dp);
+        var publicKeyParameters = new ECPublicKeyParameters(dp.Curve.DecodePoint(pointData), dp);
 
         var encodedPublicKey = EncodePublicKey(pointData);
 
@@ -85,59 +82,38 @@ public class RequestSigner
         return PATTERN_STRING_EOS_PREFIX_PUB_R1 + base58Key;
     }
 
-    // TODO: Remove this unnecessary class    
-    private static class R1PublicKeyDecoder
-    {
-        public static X9ECParameters GetEcParameterSpec() => ECNamedCurveTable.GetByName("secp256r1");
-
-        public static string AddressWithoutPrefix(string address) => address[7..];
-    }
-
     #endregion
 
     #region Private Key
 
     public static EosPrivateKey DecodePrivateKey(string encodedPrivateKey)
     {
-        var payload = Base58.Bitcoin.Decode(R1PrivateKeyDecoder.AddressWithoutPrefix(encodedPrivateKey));
+        var payload = Base58.Bitcoin.Decode(StripKeyPrefix(encodedPrivateKey));
 
-        var hex = Hex.ToHexString(payload);
-        hex = hex[..^CHECKSUM_LENGTH];
-        hex = hex[R1PrivateKeyDecoder.GetWifPrefixLength()..];
+        var hex = Hex.ToHexString(payload)[..^CHECKSUM_LENGTH];
 
-        var x9 = R1PrivateKeyDecoder.GetEcParameterSpec();
-        var d = new BigInteger(hex, 16);
-        var dp = new ECDomainParameters(x9);
-
-        var privateKeyParameters = new ECPrivateKeyParameters(d, dp);
+        var privateKeyParameters = new ECPrivateKeyParameters(new BigInteger(hex, 16), GetEcDomainParameters());
 
         return new EosPrivateKey(privateKeyParameters);
-    }
-
-    // TODO: Remove theis unnecessary class
-    private static class R1PrivateKeyDecoder
-    {
-        public static X9ECParameters GetEcParameterSpec() => ECNamedCurveTable.GetByName("secp256r1");
-
-        public static string AddressWithoutPrefix(string address) => address[7..];
-
-        public static int GetWifPrefixLength() => 0;
     }
 
     #endregion
 
     #region Utilities
 
+    private static X9ECParameters GetEcParameterSpec() => ECNamedCurveTable.GetByName("secp256r1");
+
+    private static ECDomainParameters GetEcDomainParameters() => new(GetEcParameterSpec());
+
+    private static string StripKeyPrefix(string key) => key[7..];
+
     private static byte[] ExtractCheckSumRipemd160(byte[] pemKey, byte[] keyTypeByteArray)
     {
-        pemKey = Combine(pemKey, keyTypeByteArray);
-
-        var ripemd160Digest = DigestRipemd160(pemKey);
-
-        return Arrays.CopyOfRange(ripemd160Digest, 0, CHECKSUM_BYTES);
+        var digest = DigestRipeMd160(Combine(pemKey, keyTypeByteArray));
+        return Arrays.CopyOfRange(digest, 0, CHECKSUM_BYTES);
     }
 
-    private static byte[] DigestRipemd160(byte[] bytes)
+    private static byte[] DigestRipeMd160(byte[] bytes)
     {
         var digest = new RipeMD160Digest();
         digest.BlockUpdate(bytes, 0, bytes.Length);
