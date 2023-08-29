@@ -1,12 +1,14 @@
-﻿using Org.BouncyCastle.Asn1;
-using Org.BouncyCastle.Asn1.X509;
+﻿using System.Runtime.CompilerServices;
+using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Utilities;
 using Org.BouncyCastle.Utilities.Encoders;
 using Org.BouncyCastle.Utilities.IO.Pem;
 
 // Use the OpenSSL PemReader to for parsing the PEM Object Type (IO.Pem.PemReader doesn't support parsing)
-using PemReader = Org.BouncyCastle.OpenSsl.PemReader; 
+using PemReader = Org.BouncyCastle.OpenSsl.PemReader;
+
+[assembly:InternalsVisibleTo("Bullish.Signer.Tests")]
 
 namespace Bullish.Signer;
 
@@ -15,7 +17,7 @@ namespace Bullish.Signer;
 /// PEMObject is passed into the constructor. Once initialized the PemProcessor can be used to
 /// return the type, DER format, or algorithm used to create the PemObject.
 /// </summary>
-public class PemProcessor
+internal class PemProcessor
 {
     private const int PrivateKeyStartIndex = 2;
     private const string DerToPemConversion = "Error converting DER encoded key to PEM format!";
@@ -32,10 +34,10 @@ public class PemProcessor
     /// </summary>
     /// <param name="pemObject">Input PEM content in String format.</param>
     /// <exception cref="Exception">Exception when failing to read pem data from the input.</exception>
-    public PemProcessor(string pemObject)
+    internal PemProcessor(string pemObject)
     {
         _pemObjectString = pemObject;
-        
+
         try
         {
             using var reader = new StringReader(_pemObjectString);
@@ -53,23 +55,14 @@ public class PemProcessor
         }
     }
 
-    /// <summary>
-    /// Gets the PEM Object key type (i.e. PRIVATE KEY, PUBLIC KEY).
-    /// </summary>
-    public string Type => _pemObject.Type;
-
-    /// <summary>
-    /// Gets the DER encoded format of the key from its PEM format.
-    /// </summary>
-    public string DerFormat => Hex.ToHexString(_pemObject.Content);
-
-    public byte[] GetKeyData()
+    internal byte[] GetKeyData()
     {
         var pemObjectParsed = ParsePemObject();
 
-        if (pemObjectParsed is SubjectPublicKeyInfo publicKeyInfo)
+        if (pemObjectParsed is ECPublicKeyParameters ecPublicKeyParameters)
         {
-            return publicKeyInfo.PublicKeyData.GetOctets();
+            // Ensure we return the compressed public key (not the default on .NET)
+            return ecPublicKeyParameters.Q.Normalize().GetEncoded(true); 
         }
 
         if (pemObjectParsed is ECPrivateKeyParameters)
@@ -102,6 +95,16 @@ public class PemProcessor
 
         throw new InvalidOperationException(DerToPemConversion);
     }
+    
+    /// <summary>
+    /// Gets the PEM Object key type (i.e. PRIVATE KEY, PUBLIC KEY).
+    /// </summary>
+    internal string Type => _pemObject.Type;
+    
+    /// <summary>
+    /// Gets the DER encoded format of the key from its PEM format.
+    /// </summary>
+    private string DerFormat => Hex.ToHexString(_pemObject.Content);
 
     private object ParsePemObject()
     {
@@ -112,6 +115,7 @@ public class PemProcessor
             using var pemParser = new PemReader(reader);
 
             return pemParser.ReadObject();
+            ;
         }
         catch (IOException ex)
         {
