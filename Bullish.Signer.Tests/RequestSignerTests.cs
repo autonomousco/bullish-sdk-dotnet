@@ -9,7 +9,7 @@ public class RequestSignerTests
 {
     private const string PrivateKeyString = "PVT_R1_2qZH5Pi9MJ7P3AB8Q4es6Mv56q54omL5xbpYZG4CC75GUPSEe";
     private const string PublicKeyString = "PUB_R1_6ZNjnsuzXsdhgMzP2JkfWYtWVPfajpzvgA7xn8ytaTCEJoXkYk";
-    
+
     private const string Payload = "{\"accountId\":\"222000000000000\",\"nonce\":1639393131,\"expirationTime\":1639393731,\"biometricsUsed\":false,\"sessionKey\":null}";
 
     private const string PublicKeyPem =
@@ -31,12 +31,15 @@ public class RequestSignerTests
     [Fact]
     public void TestSigning()
     {
-        var signature =  RequestSigner.Sign(PrivateKeyString, PublicKeyString, Payload);
-        // assertTrue(requestSigner.verifySignature(digest, signature, publicKey));
+        var signature = RequestSigner.Sign(PrivateKeyString, PublicKeyString, Payload);
+
+        var isVerified = RequestSigner.Verify(signature, PublicKeyString, Payload);
+
+        Assert.True(isVerified);
     }
 
     [Fact]
-    public void TestSignature()
+    public void TestDeterministicSigning()
     {
         // Test signing in a deterministic manner, by providing R and S for signature
         var r = new BigInteger("20261800083856547382386090746389798364518017217430138826487956475158205104095");
@@ -109,7 +112,7 @@ public class RequestSignerTests
         Assert.Equal("PRIVATE KEY", pemProcessor.Type);
 
         var derBytes = pemProcessor.GetKeyData();
-        
+
         var asn1 = Asn1Object.FromByteArray(derBytes);
 
         Assert.IsAssignableFrom<Asn1Object>(asn1);
