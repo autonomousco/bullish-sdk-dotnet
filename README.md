@@ -2,7 +2,7 @@
 
 A .NET API client and signer for the Bullish Exchange API. Documentation for the API can be found [here](https://api.exchange.bullish.com/docs/api/rest/)
 
-## Installation
+## Using the API Client
 
 Add a reference to Bullish.Api.Client and instantiate the BxHttpClient with your API key and metadata.
 
