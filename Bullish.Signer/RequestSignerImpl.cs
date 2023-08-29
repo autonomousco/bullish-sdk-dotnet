@@ -17,10 +17,6 @@ namespace Bullish.Signer;
 
 internal static class RequestSignerImpl
 {
-    internal record EosPrivateKey(ECPrivateKeyParameters PrivateKey);
-
-    internal record EosPublicKey(string EncodedPublicKey, ECPublicKeyParameters PublicKey);
-
     private const int ChecksumBytes = 4;
     private const int ChecksumLength = 8;
     private const int FirstTwoBytesOfKey = 4;
