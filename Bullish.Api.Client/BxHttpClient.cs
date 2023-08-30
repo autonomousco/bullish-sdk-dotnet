@@ -10,8 +10,12 @@ public class BxHttpClient
     private readonly EosPrivateKey _privateKey;
 
     private string _authorizer = string.Empty;
-    private string _jtw = string.Empty;
+    private string _jwt = string.Empty;
+    private DateTime _jwtCreated = DateTime.MinValue;
+    
     private Nonce _nonce = Nonce.Empty;
+
+    private string _apiServer;
 
     public BxHttpClient(string publicKey, string privateKey, string metadata)
     {
@@ -19,22 +23,39 @@ public class BxHttpClient
 
         _privateKey = RequestSigner.GetEosPrivateKey(privateKey);
         _publicKey = RequestSigner.GetEosPublicKey(publicKey);
+
+        // Set the default API server to Production
+        _apiServer = Data.BxApiServers[BxApiServer.Production];
     }
 
-    public async Task GetNonce()
+    public BxHttpClient ConfigureApiServer(BxApiServer apiServer)
     {
-        var baseUrl = "https://api.exchange.bullish.com/trading-api/v1";
-        var httpClient = new HttpClient();
+        _apiServer = Data.BxApiServers[apiServer];
+        return this;
+    }
 
-        var response = await httpClient.GetAsync($"{baseUrl}/nonce");
+    public async Task<BxHttpResponse<T>> MakeRequest<T>(string path)
+    {
+        var url = $"{_apiServer}{path}";
+
+        var httpClient = new HttpClient();
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _jwt);
+        var response = await httpClient.GetAsync(url);
+
+        var json = await response.Content.ReadAsStringAsync();
+
         if (response.IsSuccessStatusCode)
         {
-            var result = await response.Content.ReadAsStringAsync();
+            var obj = Utilities.Deserialize<T>(json);
             
-            var nonce = Utilities.Deserialize<Nonce>(result);
-
-            _nonce = nonce ?? throw new Exception("The nonce did not contain the expected data");
+            return obj is not null ?
+                BxHttpResponse<T>.Success(obj) : 
+                BxHttpResponse<T>.Failure("Could not deserialize response.");
         }
+        
+        var bxHttpError = Utilities.Deserialize<BxHttpError>(json) ?? BxHttpError.Error("Unknown error");
+
+        return BxHttpResponse<T>.Failure(bxHttpError);
     }
 
     public async Task Login()
@@ -78,8 +99,39 @@ public class BxHttpClient
             if (loginResponse is null)
                 throw new Exception("The login response did not contain the expected data");
 
-            _jtw = loginResponse.Token;
+            _jwt = loginResponse.Token;
+            _jwtCreated = DateTime.UtcNow;
             _authorizer = loginResponse.Authorizer;
         }
+    }
+
+    private async Task GetNonce()
+    {
+        var baseUrl = "https://api.exchange.bullish.com/trading-api/v1";
+        var httpClient = new HttpClient();
+
+        var response = await httpClient.GetAsync($"{baseUrl}/nonce");
+        if (response.IsSuccessStatusCode)
+        {
+            var result = await response.Content.ReadAsStringAsync();
+
+            var nonce = Utilities.Deserialize<Nonce>(result);
+
+            _nonce = nonce ?? throw new Exception("The nonce did not contain the expected data");
+        }
+    }
+
+    private bool IsNonceValid()
+    {
+        // TODO: Shift into Nonce record
+        if (_nonce.LowerBound == 0 || _nonce.UpperBound == 0)
+            return false;
+
+        var todayUtc = DateTime.UtcNow.TodayUtc();
+
+        var localLower = todayUtc.ToUnixTimeMicroseconds();
+        var localUpper = localLower + 86399999000; // Add time up to 1ms before midnight
+
+        return _nonce.LowerBound == localLower && _nonce.UpperBound == localUpper;
     }
 }

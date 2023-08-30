@@ -3,7 +3,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-[assembly:InternalsVisibleTo("ApiTester")]
+[assembly: InternalsVisibleTo("ApiTester")]
 
 namespace Bullish.Api.Client;
 
