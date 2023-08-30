@@ -15,6 +15,7 @@ internal static class Utilities
         {
             PropertyNameCaseInsensitive = true,
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            NumberHandling = JsonNumberHandling.AllowReadingFromString,
             WriteIndented = writeIndented,
         };
 

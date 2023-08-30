@@ -1,4 +1,4 @@
-namespace Bullish.Api.Client;
+namespace Bullish.Api.Client.Resources;
 
 public static class Orders
 {
