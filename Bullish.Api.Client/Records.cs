@@ -242,48 +242,132 @@ public record ExchangeTime
     public required DateTime DateTime { get; init; }
 }
 
+public record WalletWithdrawalLimit
+{
+    public required string Symbol { get; init; }
+    public required string Available { get; init; }
+    public required string TwentyFourHour { get; init; }
+}
+public record WalletDepositCrypto
+{
+    public required string Network { get; set; }
+    public required string Symbol { get; set; }
+    public required string Address { get; set; }
+}
+
+public record WalletWithdrawalCrypto
+{
+    public required string Network { get; set; }
+    public required string Symbol { get; set; }
+    public required string Address { get; set; }
+    public required string Fee { get; set; }
+    public required string Memo { get; set; }
+    public required string Label { get; set; }
+    public required string DestinationId { get; set; }
+}
+
+public record IntermediaryBank
+{
+    public required string Name { get; set; }
+    public required string PhysicalAddress { get; set; }
+    public required string RoutingCode { get; set; }
+}
+
+public record WalletWithdrawalFiat
+{
+    public required string DestinationId { get; set; }
+    public required string AccountNumber { get; set; }
+    public required string Network { get; set; }
+    public required string Symbol { get; set; }
+    public required string Name { get; set; }
+    public required string PhysicalAddress { get; set; }
+    public required string Fee { get; set; }
+    public required string Memo { get; set; }
+    public required Bank Bank { get; set; }
+    public required IntermediaryBank IntermediaryBank { get; set; }
+}
+
+public record Bank
+{
+    public required string Name { get; set; }
+    public required string PhysicalAddress { get; set; }
+    public required string RoutingCode { get; set; }
+}
+
+public record WalletDepositFiat
+{
+    public required string Network { get; set; }
+    public required string Symbol { get; set; }
+    public required string AccountNumber { get; set; }
+    public required string Name { get; set; }
+    public required string PhysicalAddress { get; set; }
+    public required string Memo { get; set; }
+    public required Bank Bank { get; set; }
+}
+
+public record WalletTransaction
+{
+    public required string CustodyTransactionId { get; init; }
+    public required string Direction { get; init; }
+    public required string Quantity { get; init; }
+    public required string Symbol { get; init; }
+    public required string Network { get; init; }
+    public required string Fee { get; init; }
+    public required string Memo { get; init; }
+    public required DateTime CreatedAtDateTime { get; init; }
+    public required string Status { get; init; }
+    public required TransactionDetails TransactionDetails { get; init; }
+}
+
+public record TransactionDetails
+{
+    public required string Address { get; init; }
+    public required string BlockchainTxId { get; init; }
+    public required string SwiftUetr { get; init; }
+}
+
 public record AmmInstruction
 {
-    public required string LiquidityId { get; set; }
-    public required string Symbol { get; set; }
-    public required string BaseFee { get; set; }
-    public required string QuoteFee { get; set; }
-    public required string Status { get; set; }
-    public required string StatusReason { get; set; }
-    public required int StatusReasonCode { get; set; }
-    public required DateTime CreatedAtDatetime { get; set; }
-    public required string CreatedAtTimestamp { get; set; }
+    public required string LiquidityId { get; init; }
+    public required string Symbol { get; init; }
+    public required string BaseFee { get; init; }
+    public required string QuoteFee { get; init; }
+    public required string Status { get; init; }
+    public required string StatusReason { get; init; }
+    public required int StatusReasonCode { get; init; }
+    public required DateTime CreatedAtDatetime { get; init; }
+    public required string CreatedAtTimestamp { get; init; }
  
     [JsonPropertyName("24HrApy")]
-    public required string TwentyFourHrApy { get; set; }
+    public required string TwentyFourHrApy { get; init; }
 
     [JsonPropertyName("24HrYieldEarn")]
-    public required string TwentyFourHrYieldEarn { get; set; }
+    public required string TwentyFourHrYieldEarn { get; init; }
     
-    public required string Apy { get; set; }
-    public required string BaseCurrentQuantity { get; set; }
-    public required string BaseInvestQuantity { get; set; }
-    public required string BasePrice { get; set; }
-    public required string BaseWithdrawQuantity { get; set; }
-    public required string CurrentValue { get; set; }
-    public required bool DislocationEnabled { get; set; }
-    public required string FeeTierId { get; set; }
-    public required string FinalValue { get; set; }
-    public required string ImpermanentLoss { get; set; }
-    public required string InitialBasePrice { get; set; }
-    public required string InitialQuotePrice { get; set; }
-    public required string InitialValue { get; set; }
-    public required string LowerBound { get; set; }
-    public required string Price { get; set; }
-    public required string QuoteCurrentQuantity { get; set; }
-    public required string QuoteInvestQuantity { get; set; }
-    public required string QuotePrice { get; set; }
-    public required string QuoteWithdrawQuantity { get; set; }
-    public required string RequestId { get; set; }
-    public required string StaticSpreadFee { get; set; }
-    public required DateTime UpdatedAtDatetime { get; set; }
-    public required string UpdatedAtTimestamp { get; set; }
-    public required string UpperBound { get; set; }
-    public required string YieldEarn { get; set; }
+    public required string Apy { get; init; }
+    public required string BaseCurrentQuantity { get; init; }
+    public required string BaseInvestQuantity { get; init; }
+    public required string BasePrice { get; init; }
+    public required string BaseWithdrawQuantity { get; init; }
+    public required string CurrentValue { get; init; }
+    public required bool DislocationEnabled { get; init; }
+    public required string FeeTierId { get; init; }
+    public required string FinalValue { get; init; }
+    public required string ImpermanentLoss { get; init; }
+    public required string InitialBasePrice { get; init; }
+    public required string InitialQuotePrice { get; init; }
+    public required string InitialValue { get; init; }
+    public required string LowerBound { get; init; }
+    public required string Price { get; init; }
+    public required string QuoteCurrentQuantity { get; init; }
+    public required string QuoteInvestQuantity { get; init; }
+    public required string QuotePrice { get; init; }
+    public required string QuoteWithdrawQuantity { get; init; }
+    public required string RequestId { get; init; }
+    public required string StaticSpreadFee { get; init; }
+    public required DateTime UpdatedAtDatetime { get; init; }
+    public required string UpdatedAtTimestamp { get; init; }
+    public required string UpperBound { get; init; }
+    public required string YieldEarn { get; init; }
 }
 
