@@ -7,6 +7,13 @@ public enum OrderSide
     Sell
 }
 
+public enum AmmInstructionStatus
+{
+    None,
+    Open,
+    Closed,
+}
+
 public enum OrderStatus
 {
     None = 0,
@@ -14,6 +21,17 @@ public enum OrderStatus
     Closed,
     Cancelled,
     Rejected,
+}
+
+public enum TimeBucket
+{
+    OneMinute,
+    FiveMinutes,
+    ThirtyMinutes,
+    OneHour,
+    SixHours,
+    TwelveHours,
+    OneDay,
 }
 
 public enum BxApiServer
@@ -27,6 +45,8 @@ public enum BxApiServer
 
 public enum BxApiEndpoint
 {
+    Nonce,
+    Time,
     AccountsTradingAccounts,
     AccountsAsset,
     AccountsAssetSymbol,
@@ -35,7 +55,6 @@ public enum BxApiEndpoint
     AmmInstructions,
     AmmInstructionsLiquidityId,
     WalletsTransactions,
-    WalletsLimits,
     WalletsLimitsSymbol,
     WalletsDepositInstructionsCryptoSymbol,
     WalletsWithdrawalInstructionsCryptoSymbol,
@@ -43,7 +62,6 @@ public enum BxApiEndpoint
     WalletsWithdrawalInstructionsFiatSymbol,
     Trades,
     TradesTradeId,
-    Time,
     Assets,
     AssetsSymbol,
     Markets,
@@ -68,6 +86,8 @@ public static class Data
 
     public static Dictionary<BxApiEndpoint, string> BxApiEndpoints = new()
     {
+        { BxApiEndpoint.Nonce, "/nonce" },
+        { BxApiEndpoint.Time, "/time" },
         { BxApiEndpoint.AccountsAsset, "/accounts/asset" },
         { BxApiEndpoint.AccountsAssetSymbol, "/accounts/asset/{symbol}" },
         { BxApiEndpoint.AccountsTradingAccounts, "/accounts/trading-accounts" },
@@ -83,7 +103,6 @@ public static class Data
         { BxApiEndpoint.WalletsWithdrawalInstructionsFiatSymbol, "/wallets/withdrawal-instructions/fiat/{symbol}" },
         { BxApiEndpoint.Trades, "/trades" },
         { BxApiEndpoint.TradesTradeId, "/trades/{tradeId}" },
-        { BxApiEndpoint.Time, "/time" },
         { BxApiEndpoint.Assets, "/assets" },
         { BxApiEndpoint.AssetsSymbol, "/assets/{symbol}" },
         { BxApiEndpoint.Markets, "/markets" },

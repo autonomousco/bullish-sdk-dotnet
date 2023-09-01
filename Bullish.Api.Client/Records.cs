@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization;
 
 [assembly: InternalsVisibleTo("ApiTester")]
 
@@ -32,6 +33,21 @@ public record LoginResponse
     public required string Authorizer { get; init; }
     public required string OwnerAuthorizer { get; init; }
     public required string Token { get; init; }
+}
+
+public record Trade
+{
+    public required string TradeId { get; init; }
+    public required string OrderId { get; init; }
+    public required string Symbol { get; init; }
+    public required string Price { get; init; }
+    public required string Quantity { get; init; }
+    public required string BaseFee { get; init; }
+    public required string QuoteFee { get; init; }
+    public required string Side { get; init; }
+    public required bool IsTaker { get; init; }
+    public required DateTime CreatedAtDatetime { get; init; }
+    public required string CreatedAtTimestamp { get; init; }
 }
 
 public record AssetAccount
@@ -70,6 +86,63 @@ public record Order
     public required string StatusReasonCode { get; init; }
     public required DateTime CreatedAtDatetime { get; init; }
     public required string CreatedAtTimestamp { get; init; }
+}
+
+public record Ask
+{
+    public required string Price { get; init; }
+    public required string PriceLevelQuantity { get; init; }
+}
+
+public record Bid
+{
+    public required string Price { get; init; }
+    public required string PriceLevelQuantity { get; init; }
+}
+
+public record OrderBook
+{
+    public required List<Bid> Bids { get; init; }
+    public required List<Ask> Asks { get; init; }
+    public required DateTime Datetime { get; init; }
+    public required string Timestamp { get; init; }
+    public required int SequenceNumber { get; init; }
+}
+
+public record AmmData
+{
+    public required string FeeTierId { get; init; }
+    public required string BidSpreadFee { get; init; }
+    public required string AskSpreadFee { get; init; }
+    public required string BaseReservesQuantity { get; init; }
+    public required string QuoteReservesQuantity { get; init; }
+    public required string CurrentPrice { get; init; }
+}
+
+public record Tick
+{
+    public required DateTime CreatedAtDatetime { get; init; }
+    public required string CreatedAtTimestamp { get; init; }
+    public required string High { get; init; }
+    public required string Low { get; init; }
+    public required string BestBid { get; init; }
+    public required string BidVolume { get; init; }
+    public required string BestAsk { get; init; }
+    public required string AskVolume { get; init; }
+    public required string Vwap { get; init; }
+    public required string Open { get; init; }
+    public required string Close { get; init; }
+    public required string Last { get; init; }
+    public required string Change { get; init; }
+    public required string Percentage { get; init; }
+    public required string Average { get; init; }
+    public required string BaseVolume { get; init; }
+    public required string QuoteVolume { get; init; }
+    public required string BancorPrice { get; init; }
+    public required DateTime LastTradeDatetime { get; init; }
+    public required string LastTradeTimestamp { get; init; }
+    public required string LastTradeQuantity { get; init; }
+    public required List<AmmData> AmmData { get; init; }
 }
 
 public record TradingAccount
@@ -128,83 +201,89 @@ public record Market
     public required List<FeeTier> FeeTiers { get; init; }
 }
 
-
-public record Nonce
+public record MarketCandle
 {
-    public required long LowerBound { get; init; }
-    public required long UpperBound { get; init; }
-
-    public long Value { get; private set; } = -1;
-
-    public static Nonce Empty => new Nonce
-    {
-        UpperBound = 0,
-        LowerBound = 0,
-    };
-
-    public long NextValue()
-    {
-        if (Value == -1)
-        {
-            Value = LowerBound;
-            return Value;
-        }
-
-        if (Value == UpperBound)
-            throw new Exception("Value cannot exceed upper bounds");
-
-        return ++Value;
-    }
+    public required string Open { get; init; }
+    public required string High { get; init; }
+    public required string Low { get; init; }
+    public required string Close { get; init; }
+    public required string Volume { get; init; }
+    public required string CreatedAtTimestamp { get; init; }
+    public required DateTime CreatedAtDatetime { get; init; }
 }
 
-public record BxHttpError
+public record MarketTrade
 {
-    public required string ErrorCode { get; init; }
-    public required string ErrorCodeName { get; init; }
-    public required string Message { get; init; }
-    public required object Raw { get; init; }
-
-    public static BxHttpError Empty => new()
-    {
-        ErrorCode = string.Empty,
-        ErrorCodeName = string.Empty,
-        Message = string.Empty,
-        Raw = new object(),
-    };
-
-    public static BxHttpError Error(string message) => new()
-    {
-        Message = message,
-        Raw = new object(),
-        ErrorCode = string.Empty,
-        ErrorCodeName = string.Empty,
-    };
+    public required string TradeId { get; init; }
+    public required string Symbol { get; init; }
+    public required string Price { get; init; }
+    public required string Quantity { get; init; }
+    public required string Side { get; init; }
+    public required bool IsTaker { get; init; }
+    public required DateTime CreatedAtDatetime { get; init; }
+    public required string CreatedAtTimestamp { get; init; }
 }
 
-public record BxHttpResponse<T>
+public record Asset
 {
-    public required bool IsSuccess { get; init; }
-    public required T? Result { get; init; }
-    public required BxHttpError Error { get; init; }
-
-    public static BxHttpResponse<T> Success(T result) => new()
-    {
-        Result = result,
-        IsSuccess = true,
-        Error = BxHttpError.Empty
-    };
-
-    public static BxHttpResponse<T> Failure(BxHttpError error) => new()
-    {
-        Result = default,
-        IsSuccess = false,
-        Error = error
-    };
-
-    public static BxHttpResponse<T> Failure(string message) => new()
-    {
-        Result = default,
-        IsSuccess = false,
-        Error = BxHttpError.Error(message)
-    };
+    public required string AssetId { get; init; }
+    public required string Symbol { get; init; }
+    public required string Precision { get; init; }
+    public required string MinBalanceInterest { get; init; }
+    public required string MinFee { get; init; }
+    public required string Apr { get; init; }
+    public required string CollateralRating { get; init; }
+    public required string MaxBorrow { get; init; }
 }
+
+public record ExchangeTime
+{
+    public required long Timestamp { get; init; }
+    public required DateTime DateTime { get; init; }
+}
+
+public record AmmInstruction
+{
+    public required string LiquidityId { get; set; }
+    public required string Symbol { get; set; }
+    public required string BaseFee { get; set; }
+    public required string QuoteFee { get; set; }
+    public required string Status { get; set; }
+    public required string StatusReason { get; set; }
+    public required int StatusReasonCode { get; set; }
+    public required DateTime CreatedAtDatetime { get; set; }
+    public required string CreatedAtTimestamp { get; set; }
+ 
+    [JsonPropertyName("24HrApy")]
+    public required string TwentyFourHrApy { get; set; }
+
+    [JsonPropertyName("24HrYieldEarn")]
+    public required string TwentyFourHrYieldEarn { get; set; }
+    
+    public required string Apy { get; set; }
+    public required string BaseCurrentQuantity { get; set; }
+    public required string BaseInvestQuantity { get; set; }
+    public required string BasePrice { get; set; }
+    public required string BaseWithdrawQuantity { get; set; }
+    public required string CurrentValue { get; set; }
+    public required bool DislocationEnabled { get; set; }
+    public required string FeeTierId { get; set; }
+    public required string FinalValue { get; set; }
+    public required string ImpermanentLoss { get; set; }
+    public required string InitialBasePrice { get; set; }
+    public required string InitialQuotePrice { get; set; }
+    public required string InitialValue { get; set; }
+    public required string LowerBound { get; set; }
+    public required string Price { get; set; }
+    public required string QuoteCurrentQuantity { get; set; }
+    public required string QuoteInvestQuantity { get; set; }
+    public required string QuotePrice { get; set; }
+    public required string QuoteWithdrawQuantity { get; set; }
+    public required string RequestId { get; set; }
+    public required string StaticSpreadFee { get; set; }
+    public required DateTime UpdatedAtDatetime { get; set; }
+    public required string UpdatedAtTimestamp { get; set; }
+    public required string UpperBound { get; set; }
+    public required string YieldEarn { get; set; }
+}
+

@@ -1,6 +1,6 @@
-namespace Bullish.Api.Client;
+namespace Bullish.Api.Client.HttpClient;
 
-public class BxPathBuilder
+internal class BxPathBuilder
 {
     private readonly List<string> _components = new();
 
@@ -41,5 +41,11 @@ public class BxPathBuilder
         _components.Add($"{prefix}{name}={value.ToUpperInvariant()}");
 
         return this;
+    }
+
+    public BxPathBuilder AddQueryParam(BxDateTime timestamp)
+    {
+        var (name, value) = timestamp.AsQueryParam();
+        return AddQueryParam(name, value);
     }
 }

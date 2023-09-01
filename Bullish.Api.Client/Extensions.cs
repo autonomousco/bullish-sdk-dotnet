@@ -1,6 +1,10 @@
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
 namespace Bullish.Api.Client;
 
-public static class Extensions
+internal static class Extensions
 {
     public static DateTime TodayUtc(this DateTime dateTime)
     {
@@ -17,6 +21,35 @@ public static class Extensions
         
         return new DateTimeOffset(dateTime).ToUnixTimeMilliseconds() * 1000;
     }
+    
+    private static JsonSerializerOptions GetJsonSerializerOptions(bool writeIndented = false)
+    {
+        var jsonSerializerOptions = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            NumberHandling = JsonNumberHandling.AllowReadingFromString,
+            WriteIndented = writeIndented,
+        };
 
- 
+        jsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+
+        return jsonSerializerOptions;
+    }
+
+    public static string Serialize(object obj, bool writeIndented = false)
+    {
+        return JsonSerializer.Serialize(obj, GetJsonSerializerOptions(writeIndented));
+    }
+
+    public static T? Deserialize<T>(string json)
+    {
+        return JsonSerializer.Deserialize<T>(json, GetJsonSerializerOptions());
+    }
+
+    public static T? DeserializeBase64<T>(string base64String)
+    {
+        var json = Encoding.UTF8.GetString(Convert.FromBase64String(base64String));
+        return JsonSerializer.Deserialize<T>(json, GetJsonSerializerOptions());
+    }
 }
