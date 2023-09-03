@@ -9,6 +9,8 @@ public class BxPathBuilder
     
     private readonly List<string> _components = new();
 
+    private bool _usePagination = false;
+
     public BxPathBuilder(BxApiEndpoint endpoint)
     {
         _endpoint = endpoint;
@@ -32,7 +34,24 @@ public class BxPathBuilder
 
     public BxPath Build()
     {
-        return new BxPath(_endpoint, string.Concat(_components), _bxEndpoint.UseAuth);
+        return new BxPath(_endpoint, string.Concat(_components), _bxEndpoint.UseAuth, _usePagination);
+    }
+
+    public BxPathBuilder AddPageLink(BxPageLink pageLink)
+    {
+        AddQueryParam(pageLink.Name, pageLink.Value);
+
+        return this;
+    }
+
+    public BxPathBuilder AddPagination(int pageSize, bool useMetaData)
+    {
+        AddQueryParam("_pageSize", pageSize.ToString());
+        AddQueryParam("_metaData", useMetaData);
+
+        _usePagination = true;
+
+        return this;
     }
 
     public BxPathBuilder AddQueryParam<T>(string name, T value)
@@ -45,11 +64,12 @@ public class BxPathBuilder
         if(string.IsNullOrWhiteSpace(valueStr))
             throw new Exception($"Value string for {name} cannot be null.");
 
-        var value2 = string.Empty;
-        if (typeof(T).IsEnum)
+        var value2 = typeof(T).IsEnum switch
         {
-            value2 = Convert.ToInt32(value) == 0 ? string.Empty : valueStr.ToUpperInvariant();
-        }
+            true when value is TimeBucket bucket => bucket.ToBxTimeBucket(),
+            true => Convert.ToInt32(value) == 0 ? string.Empty : valueStr.ToUpperInvariant(),
+            false => valueStr,
+        };
 
         return AddQueryParam(name, value2);;
     }
@@ -61,7 +81,7 @@ public class BxPathBuilder
 
         var prefix = _components.Any(i => i.StartsWith("?")) ? "&" : "?";
 
-        _components.Add($"{prefix}{name}={value.ToUpperInvariant()}");
+        _components.Add($"{prefix}{name}={value}");
 
         return this;
     }

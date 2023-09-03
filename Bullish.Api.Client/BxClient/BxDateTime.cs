@@ -34,10 +34,10 @@ public record BxDateTime
     {
         return _type switch
         {
-            Type.GreaterThan => ("createdAtDatetime[gt]", $"{_timestamp}"),
-            Type.GreaterThanOrEqual => ("createdAtDatetime[gte]", $"{_timestamp}"),
-            Type.LessThan => ("createdAtDatetime[lt]", $"{_timestamp}"),
-            Type.LessThanOrEqual => ("createdAtDatetime[lte]", $"{_timestamp}"),
+            Type.GreaterThan => ("createdAtDatetime[gt]", _timestamp.AsBxDateTime()),
+            Type.GreaterThanOrEqual => ("createdAtDatetime[gte]", _timestamp.AsBxDateTime()),
+            Type.LessThan => ("createdAtDatetime[lt]", _timestamp.AsBxDateTime()),
+            Type.LessThanOrEqual => ("createdAtDatetime[lte]", _timestamp.AsBxDateTime()),
             _ => throw new ArgumentOutOfRangeException()
         };
     }

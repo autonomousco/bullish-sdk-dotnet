@@ -78,15 +78,18 @@ public static class Markets
     /// <param name="timeBucket">Time bucket size</param>
     /// <param name="fromTimestamp">Start timestamp of window</param>
     /// <param name="toTimestamp">End timestamp of window</param>
-    public static async Task<BxHttpResponse<List<MarketCandle>>> GetMarketCandles(this BxHttpClient httpClient, string symbol, TimeBucket timeBucket, DateTime fromTimestamp, DateTime toTimestamp)
+    /// <param name="pageSize">The number of candles to return 5, 25, 50, 100, default value is 25</param>
+    public static async Task<BxHttpResponse<List<MarketCandle>>> GetMarketCandles(this BxHttpClient httpClient, string symbol, TimeBucket timeBucket, DateTime fromTimestamp, DateTime toTimestamp, int pageSize = 25, BxPageLink? pageLink = null)
     {
-        var bxPath = new BxPathBuilder(BxApiEndpoint.MarketsSymbolTrades)
+        var bxPath = new BxPathBuilder(BxApiEndpoint.MarketsSymbolCandle)
             .AddResourceId(symbol)
             .AddQueryParam(BxDateTime.GreaterThanOrEqual(fromTimestamp))
             .AddQueryParam(BxDateTime.LessThanOrEqual(toTimestamp))
             .AddQueryParam("timeBucket", timeBucket)
+            .AddPagination(pageSize, useMetaData: true)
+            .AddPageLink(pageLink ?? BxPageLink.Empty)
             .Build();
-        
+
         return await httpClient.Get<List<MarketCandle>>(bxPath);
     }
 }

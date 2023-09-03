@@ -5,9 +5,29 @@ using System.Text.Json.Serialization;
 
 namespace Bullish.Api.Client;
 
-public record BxPath(BxApiEndpoint Endpoint, string Path, bool UseAuth);
+public record BxPath(BxApiEndpoint Endpoint, string Path, bool UseAuth, bool UsePagination);
 
 public record BxEndpoint(string Path, string Version, bool UseAuth);
+
+public record BxPageLinks(string Next, string Previous)
+{
+    public static BxPageLinks Empty => new(string.Empty, string.Empty);
+
+    public BxPageLink NextPage => new("_nextPage", GetPageHash(Next));
+    
+    public BxPageLink PrevPage => new("_previousPage", GetPageHash(Previous));
+
+    private string GetPageHash(string url)
+    {
+        var index = Previous.LastIndexOf("=", StringComparison.Ordinal) + 1;
+        return Previous[index..];
+    }
+}
+
+public record BxPageLink(string Name, string Value)
+{
+    public static BxPageLink Empty => new(string.Empty, string.Empty);
+}
 
 public record BxMetadata
 {

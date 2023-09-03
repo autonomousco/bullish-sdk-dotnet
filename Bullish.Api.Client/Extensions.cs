@@ -14,6 +14,29 @@ internal static class Extensions
         return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, 0,0,0, DateTimeKind.Utc);
     }
 
+    public static string AsBxDateTime(this DateTime dateTime)
+    {
+        var iso8601 = $"{dateTime:O}";
+
+        // Truncate the extra precision 
+        return $"{iso8601[..^5]}Z";
+    }
+
+    public static string ToBxTimeBucket(this TimeBucket timeBucket)
+    {
+        return timeBucket switch
+        {
+            TimeBucket.OneMinute => "1m",
+            TimeBucket.FiveMinutes => "5m",
+            TimeBucket.ThirtyMinutes => "30m",
+            TimeBucket.OneHour => "1h",
+            TimeBucket.SixHours => "6h",
+            TimeBucket.TwelveHours => "12h",
+            TimeBucket.OneDay => "1d",
+            _ => throw new ArgumentOutOfRangeException(nameof(timeBucket), timeBucket, null)
+        };
+    }
+
     public static long ToUnixTimeMicroseconds(this DateTime dateTime)
     {
         if (dateTime.Kind != DateTimeKind.Utc)
