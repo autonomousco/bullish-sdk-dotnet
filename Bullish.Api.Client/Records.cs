@@ -17,10 +17,10 @@ public record BxPageLinks(string Next, string Previous)
     
     public BxPageLink PrevPage => new("_previousPage", GetPageHash(Previous));
 
-    private string GetPageHash(string url)
+    private static string GetPageHash(string url)
     {
-        var index = Previous.LastIndexOf("=", StringComparison.Ordinal) + 1;
-        return Previous[index..];
+        var index = url.LastIndexOf("=", StringComparison.Ordinal) + 1;
+        return url[index..];
     }
 }
 
