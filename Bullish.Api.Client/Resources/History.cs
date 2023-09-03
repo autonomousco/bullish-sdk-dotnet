@@ -8,10 +8,14 @@ public static class History
     /// Get Historical Market Trades by Market Symbol.
     /// </summary>
     /// <param name="symbol">Symbol to get</param>
-    public static async Task<BxHttpResponse<List<MarketTrade>>> GetMarketTrades(this BxHttpClient httpClient, string symbol)
+    /// <param name="pageSize">The number of candles to return 5, 25, 50, 100, default value is 25</param>
+    /// <param name="pageLink">Get the results for the next or previous page</param>
+    public static async Task<BxHttpResponse<List<MarketTrade>>> GetMarketTrades(this BxHttpClient httpClient, string symbol, int pageSize = 25, BxPageLink? pageLink = null)
     {
         var bxPath = new BxPathBuilder(BxApiEndpoint.HistoryMarketsSymbolTrades)
             .AddResourceId(symbol)
+            .AddPagination(pageSize, useMetaData: true)
+            .AddPageLink(pageLink ?? BxPageLink.Empty)
             .Build();
         
         return await httpClient.Get<List<MarketTrade>>(bxPath);
@@ -22,9 +26,13 @@ public static class History
     /// Total borrowed quantity is inclusive of interest. interest = totalBorrowedQuantity - borrowedQuantity which
     /// denotes the interest charged in the particular hour for the asset.
     /// </summary>
-    public static async Task<BxHttpResponse<List<BorrowInterest>>> GetHourlyBorrowInterest(this BxHttpClient httpClient)
+    /// <param name="pageSize">The number of candles to return 5, 25, 50, 100, default value is 25</param>
+    /// <param name="pageLink">Get the results for the next or previous page</param>
+    public static async Task<BxHttpResponse<List<BorrowInterest>>> GetHourlyBorrowInterest(this BxHttpClient httpClient, int pageSize = 25, BxPageLink? pageLink = null)
     {
         var bxPath = new BxPathBuilder(BxApiEndpoint.HistoryBorrowInterest)
+            .AddPagination(pageSize, useMetaData: true)
+            .AddPageLink(pageLink ?? BxPageLink.Empty)
             .Build();
         
         return await httpClient.Get<List<BorrowInterest>>(bxPath);

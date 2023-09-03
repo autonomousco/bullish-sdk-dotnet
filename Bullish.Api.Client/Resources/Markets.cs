@@ -79,6 +79,7 @@ public static class Markets
     /// <param name="fromTimestamp">Start timestamp of window</param>
     /// <param name="toTimestamp">End timestamp of window</param>
     /// <param name="pageSize">The number of candles to return 5, 25, 50, 100, default value is 25</param>
+    /// <param name="pageLink">Get the results for the next or previous page</param>
     public static async Task<BxHttpResponse<List<MarketCandle>>> GetMarketCandles(this BxHttpClient httpClient, string symbol, TimeBucket timeBucket, DateTime fromTimestamp, DateTime toTimestamp, int pageSize = 25, BxPageLink? pageLink = null)
     {
         var bxPath = new BxPathBuilder(BxApiEndpoint.MarketsSymbolCandle)

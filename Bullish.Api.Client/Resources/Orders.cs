@@ -11,13 +11,17 @@ public static class Orders
     /// <param name="handle">Unique numeric identifier generated on the client side expressed as a string value</param>
     /// <param name="orderSide">Order side</param>
     /// <param name="orderStatus">Order status</param>
-    public static async Task<BxHttpResponse<List<Order>>> GetOrders(this BxHttpClient httpClient, string symbol = "", string handle = "", OrderSide orderSide = OrderSide.None, OrderStatus orderStatus = OrderStatus.None)
+    /// <param name="pageSize">The number of candles to return 5, 25, 50, 100, default value is 25</param>
+    /// <param name="pageLink">Get the results for the next or previous page</param>
+    public static async Task<BxHttpResponse<List<Order>>> GetOrders(this BxHttpClient httpClient, string symbol = "", string handle = "", OrderSide orderSide = OrderSide.None, OrderStatus orderStatus = OrderStatus.None, int pageSize = 25, BxPageLink? pageLink = null)
     {
         var bxPath = new BxPathBuilder(BxApiEndpoint.Orders)
             .AddQueryParam("symbol", symbol)
             .AddQueryParam("handle", handle)
             .AddQueryParam("side", orderSide)
             .AddQueryParam("status", orderStatus)
+            .AddPagination(pageSize, useMetaData: true)
+            .AddPageLink(pageLink ?? BxPageLink.Empty)
             .Build();
 
         return await httpClient.Get<List<Order>>(bxPath);

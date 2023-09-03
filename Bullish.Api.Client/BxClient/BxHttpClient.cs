@@ -6,7 +6,7 @@ namespace Bullish.Api.Client.BxClient;
 
 public class BxHttpClient
 {
-    private record EmptyPayload();
+    private record EmptyPayload;
 
     private readonly BxMetadata _bxMetadata;
     private readonly string _publicKey;
@@ -41,6 +41,9 @@ public class BxHttpClient
         var url = $"{_apiServer}{path.Path}";
 
         var httpClient = new HttpClient();
+
+        if (payload is null)
+            throw new Exception("Payload cannot be null");
 
         var bodyJson = payload is EmptyPayload ? "{}" : Extensions.Serialize(payload);
 
@@ -140,7 +143,7 @@ public class BxHttpClient
             var bxHttpError = Extensions.Deserialize<BxHttpError>(json) ?? BxHttpError.Error("Unknown error");
             return BxHttpResponse<TResult>.Failure(bxHttpError);
         }
-        catch (Exception ex)
+        catch
         {
             return BxHttpResponse<TResult>.Failure(BxHttpError.Error(response.StatusCode, json));
         }

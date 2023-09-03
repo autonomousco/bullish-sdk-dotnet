@@ -7,9 +7,13 @@ public static class Wallets
     /// <summary>
     /// Get custody transaction history
     /// </summary>
-    public static async Task<BxHttpResponse<List<WalletTransaction>>> GetTransactions(this BxHttpClient httpClient)
+    /// <param name="pageSize">The number of candles to return 5, 25, 50, 100, default value is 25</param>
+    /// <param name="pageLink">Get the results for the next or previous page</param>
+    public static async Task<BxHttpResponse<List<WalletTransaction>>> GetTransactions(this BxHttpClient httpClient, int pageSize = 25, BxPageLink? pageLink = null)
     {
         var bxPath = new BxPathBuilder(BxApiEndpoint.WalletsTransactions)
+            .AddPagination(pageSize, useMetaData: true)
+            .AddPageLink(pageLink ?? BxPageLink.Empty)
             .Build();
         
         return await httpClient.Get<List<WalletTransaction>>(bxPath);

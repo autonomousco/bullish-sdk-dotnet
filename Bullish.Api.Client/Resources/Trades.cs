@@ -9,12 +9,16 @@ public static class Trades
     /// </summary>
     /// <param name="symbol">Symbol to get</param>
     /// <param name="orderId">Unique order ID</param>
-    public static async Task<BxHttpResponse<List<Trade>>> GetTrades(this BxHttpClient httpClient, string symbol, string orderId = "")
+    /// <param name="pageSize">The number of candles to return 5, 25, 50, 100, default value is 25</param>
+    /// <param name="pageLink">Get the results for the next or previous page</param>
+    public static async Task<BxHttpResponse<List<Trade>>> GetTrades(this BxHttpClient httpClient, string symbol, string orderId = "", int pageSize = 25, BxPageLink? pageLink = null)
     {
         // TODO: Add date filters
         var bxPath = new BxPathBuilder(BxApiEndpoint.Trades)
             .AddQueryParam("symbol", symbol)
             .AddQueryParam("orderId", orderId)
+            .AddPagination(pageSize, useMetaData: true)
+            .AddPageLink(pageLink ?? BxPageLink.Empty)
             .Build();
         
         return await httpClient.Get<List<Trade>>(bxPath);
