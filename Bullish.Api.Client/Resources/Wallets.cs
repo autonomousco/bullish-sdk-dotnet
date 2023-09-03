@@ -1,4 +1,4 @@
-using Bullish.Api.Client.HttpClient;
+using Bullish.Api.Client.BxClient;
 
 namespace Bullish.Api.Client.Resources;
 
@@ -9,8 +9,10 @@ public static class Wallets
     /// </summary>
     public static async Task<BxHttpResponse<List<WalletTransaction>>> GetTransactions(this BxHttpClient httpClient)
     {
-        var pathBuilder = new BxPathBuilder(BxApiEndpoint.WalletsTransactions);
-        return await httpClient.MakeRequest<List<WalletTransaction>>(pathBuilder.Path);
+        var bxPath = new BxPathBuilder(BxApiEndpoint.WalletsTransactions)
+            .Build();
+        
+        return await httpClient.Get<List<WalletTransaction>>(bxPath);
     }
     
     /// <summary>
@@ -19,10 +21,11 @@ public static class Wallets
     /// <param name="symbol"></param>
     public static async Task<BxHttpResponse<WalletWithdrawalLimit>> GetWithdrawalLimits(this BxHttpClient httpClient, string symbol = "")
     {
-        var pathBuilder = new BxPathBuilder(BxApiEndpoint.WalletsLimitsSymbol)
-            .AddQueryParam("symbol", symbol);
+        var bxPath = new BxPathBuilder(BxApiEndpoint.WalletsLimitsSymbol)
+            .AddResourceId(symbol)
+            .Build();
         
-        return await httpClient.MakeRequest<WalletWithdrawalLimit>(pathBuilder.Path);
+        return await httpClient.Get<WalletWithdrawalLimit>(bxPath);
     }
     
     /// <summary>
@@ -31,10 +34,11 @@ public static class Wallets
     /// <param name="symbol"></param>
     public static async Task<BxHttpResponse<List<WalletDepositCrypto>>> GetDepositInstructionsCrypto(this BxHttpClient httpClient, string symbol = "")
     {
-        var pathBuilder = new BxPathBuilder(BxApiEndpoint.WalletsDepositInstructionsCryptoSymbol)
-            .AddQueryParam("symbol", symbol);
+        var bxPath = new BxPathBuilder(BxApiEndpoint.WalletsDepositInstructionsCryptoSymbol)
+            .AddResourceId(symbol)
+            .Build();
 
-        return await httpClient.MakeRequest<List<WalletDepositCrypto>>(pathBuilder.Path);
+        return await httpClient.Get<List<WalletDepositCrypto>>(bxPath);
     }
     
     /// <summary>
@@ -44,10 +48,11 @@ public static class Wallets
     /// <param name="symbol"></param>
     public static async Task<BxHttpResponse<List<WalletWithdrawalCrypto>>> GetWithdrawalInstructionsCrypto(this BxHttpClient httpClient, string symbol = "")
     {
-        var pathBuilder = new BxPathBuilder(BxApiEndpoint.WalletsWithdrawalInstructionsCryptoSymbol)
-            .AddQueryParam("symbol", symbol);
+        var bxPath = new BxPathBuilder(BxApiEndpoint.WalletsWithdrawalInstructionsCryptoSymbol)
+            .AddResourceId(symbol)
+            .Build();
 
-        return await httpClient.MakeRequest<List<WalletWithdrawalCrypto>>(pathBuilder.Path);
+        return await httpClient.Get<List<WalletWithdrawalCrypto>>(bxPath);
     }
     
     /// <summary>
@@ -56,10 +61,11 @@ public static class Wallets
     /// <param name="symbol"></param>
     public static async Task<BxHttpResponse<List<WalletDepositFiat>>> GetDepositInstructionsFiat(this BxHttpClient httpClient, string symbol = "")
     {
-        var pathBuilder = new BxPathBuilder(BxApiEndpoint.WalletsDepositInstructionsFiatSymbol)
-            .AddQueryParam("symbol", symbol);
+        var bxPath = new BxPathBuilder(BxApiEndpoint.WalletsDepositInstructionsFiatSymbol)
+            .AddResourceId(symbol)
+            .Build();
 
-        return await httpClient.MakeRequest<List<WalletDepositFiat>>(pathBuilder.Path);
+        return await httpClient.Get<List<WalletDepositFiat>>(bxPath);
     }
     
     /// <summary>
@@ -69,9 +75,10 @@ public static class Wallets
     /// <param name="symbol"></param>
     public static async Task<BxHttpResponse<List<WalletWithdrawalFiat>>> GetWithdrawalInstructionsFiat(this BxHttpClient httpClient, string symbol = "")
     {
-        var pathBuilder = new BxPathBuilder(BxApiEndpoint.WalletsWithdrawalInstructionsFiatSymbol)
-            .AddQueryParam("symbol", symbol);
+        var bxPath = new BxPathBuilder(BxApiEndpoint.WalletsWithdrawalInstructionsFiatSymbol)
+            .AddResourceId(symbol)
+            .Build();
 
-        return await httpClient.MakeRequest<List<WalletWithdrawalFiat>>(pathBuilder.Path);
+        return await httpClient.Get<List<WalletWithdrawalFiat>>(bxPath);
     }
 }

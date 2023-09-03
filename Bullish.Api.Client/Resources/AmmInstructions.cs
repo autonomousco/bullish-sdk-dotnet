@@ -1,4 +1,4 @@
-using Bullish.Api.Client.HttpClient;
+using Bullish.Api.Client.BxClient;
 
 namespace Bullish.Api.Client.Resources;
 
@@ -11,11 +11,12 @@ public static class AmmInstructions
     /// <param name="status"></param>
     public static async Task<BxHttpResponse<List<AmmInstruction>>> GetAmmInstructions(this BxHttpClient httpClient, string symbol = "", AmmInstructionStatus status = AmmInstructionStatus.None)
     {
-        var pathBuilder = new BxPathBuilder(BxApiEndpoint.AmmInstructions)
+        var bxPath = new BxPathBuilder(BxApiEndpoint.AmmInstructions)
             .AddQueryParam("symbol", symbol)
-            .AddQueryParam("status", status);
+            .AddQueryParam("status", status)
+            .Build();
 
-        return await httpClient.MakeRequest<List<AmmInstruction>>(pathBuilder.Path);
+        return await httpClient.Get<List<AmmInstruction>>(bxPath);
     }
     
     /// <summary>
@@ -24,9 +25,10 @@ public static class AmmInstructions
     /// <param name="liquidityId">Unique AMM instruction ID</param>
     public static async Task<BxHttpResponse<AmmInstruction>> GetAmmInstruction(this BxHttpClient httpClient, string liquidityId)
     {
-        var pathBuilder = new BxPathBuilder(BxApiEndpoint.AmmInstructionsLiquidityId)
-            .AddQueryParam("liquidityId", liquidityId);
+        var bxPath = new BxPathBuilder(BxApiEndpoint.AmmInstructionsLiquidityId)
+            .AddQueryParam("liquidityId", liquidityId)
+            .Build();
 
-        return await httpClient.MakeRequest<AmmInstruction>(pathBuilder.Path);
+        return await httpClient.Get<AmmInstruction>(bxPath);
     }
 }

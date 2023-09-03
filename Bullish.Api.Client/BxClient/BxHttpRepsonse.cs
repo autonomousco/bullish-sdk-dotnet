@@ -1,4 +1,4 @@
-namespace Bullish.Api.Client.HttpClient;
+namespace Bullish.Api.Client.BxClient;
 
 public record BxHttpResponse<T>
 {
@@ -10,20 +10,27 @@ public record BxHttpResponse<T>
     {
         Result = result,
         IsSuccess = true,
-        Error = BxHttpError.Empty
+        Error = BxHttpError.Empty,
+    };
+    
+    public static BxHttpResponse<T> Success() => new()
+    {
+        Result = default,
+        IsSuccess = true,
+        Error = BxHttpError.Empty,
     };
 
     public static BxHttpResponse<T> Failure(BxHttpError error) => new()
     {
         Result = default,
         IsSuccess = false,
-        Error = error
+        Error = error,
     };
 
     public static BxHttpResponse<T> Failure(string message) => new()
     {
         Result = default,
         IsSuccess = false,
-        Error = BxHttpError.Error(message)
+        Error = BxHttpError.Error(message),
     };
 }

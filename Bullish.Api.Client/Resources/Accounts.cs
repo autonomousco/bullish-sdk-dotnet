@@ -1,4 +1,4 @@
-using Bullish.Api.Client.HttpClient;
+using Bullish.Api.Client.BxClient;
 
 namespace Bullish.Api.Client.Resources;
 
@@ -9,8 +9,10 @@ public static class Accounts
     /// </summary>
     public static async Task<BxHttpResponse<List<AssetAccount>>> GetAssetAccounts(this BxHttpClient httpClient)
     {
-        var pathBuilder = new BxPathBuilder(BxApiEndpoint.AccountsAsset);
-        return await httpClient.MakeRequest<List<AssetAccount>>(pathBuilder.Path);
+        var bxPath = new BxPathBuilder(BxApiEndpoint.AccountsAsset)
+            .Build();
+        
+        return await httpClient.Get<List<AssetAccount>>(bxPath);
     }
 
     /// <summary>
@@ -19,8 +21,11 @@ public static class Accounts
     /// <param name="symbol">For example "BTC"</param>
     public static async Task<BxHttpResponse<AssetAccount>> GetAssetAccount(this BxHttpClient httpClient, string symbol)
     {
-        var pathBuilder = new BxPathBuilder(BxApiEndpoint.AccountsAssetSymbol, symbol);
-        return await httpClient.MakeRequest<AssetAccount>(pathBuilder.Path);
+        var bxPath = new BxPathBuilder(BxApiEndpoint.AccountsAssetSymbol)
+            .AddResourceId(symbol)
+            .Build();
+        
+        return await httpClient.Get<AssetAccount>(bxPath);
     }
 
     /// <summary>
@@ -29,7 +34,9 @@ public static class Accounts
     /// </summary>
     public static async Task<BxHttpResponse<List<TradingAccount>>> GetTradingAccounts(this BxHttpClient httpClient)
     {
-        var pathBuilder = new BxPathBuilder(BxApiEndpoint.AccountsTradingAccounts);
-        return await httpClient.MakeRequest<List<TradingAccount>>(pathBuilder.Path);
+        var bxPath = new BxPathBuilder(BxApiEndpoint.AccountsTradingAccounts)
+            .Build();
+        
+        return await httpClient.Get<List<TradingAccount>>(bxPath);
     }
 }

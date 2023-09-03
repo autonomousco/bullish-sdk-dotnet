@@ -1,6 +1,6 @@
-namespace Bullish.Api.Client.HttpClient;
+namespace Bullish.Api.Client.BxClient;
 
-internal record BxDateTime
+public record BxDateTime
 {
     private readonly Type _type;
     private readonly DateTime _timestamp;
@@ -38,6 +38,7 @@ internal record BxDateTime
             Type.GreaterThanOrEqual => ("createdAtDatetime[gte]", $"{_timestamp}"),
             Type.LessThan => ("createdAtDatetime[lt]", $"{_timestamp}"),
             Type.LessThanOrEqual => ("createdAtDatetime[lte]", $"{_timestamp}"),
+            _ => throw new ArgumentOutOfRangeException()
         };
     }
 }

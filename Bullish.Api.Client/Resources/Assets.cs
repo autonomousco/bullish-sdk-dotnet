@@ -1,4 +1,4 @@
-using Bullish.Api.Client.HttpClient;
+using Bullish.Api.Client.BxClient;
 
 namespace Bullish.Api.Client.Resources;
 
@@ -9,8 +9,10 @@ public static class Assets
     /// </summary>
     public static async Task<BxHttpResponse<List<Asset>>> GetAssets(this BxHttpClient httpClient)
     {
-        var pathBuilder = new BxPathBuilder(BxApiEndpoint.Assets);
-        return await httpClient.MakeRequest<List<Asset>>(pathBuilder.Path);
+        var bxPath = new BxPathBuilder(BxApiEndpoint.Assets)
+            .Build();
+        
+        return await httpClient.Get<List<Asset>>(bxPath);
     }
 
     /// <summary>
@@ -19,7 +21,10 @@ public static class Assets
     /// <param name="symbol">For example "BTC"</param>
     public static async Task<BxHttpResponse<Asset>> GetAsset(this BxHttpClient httpClient, string symbol)
     {
-        var pathBuilder = new BxPathBuilder(BxApiEndpoint.AssetsSymbol, symbol);
-        return await httpClient.MakeRequest<Asset>(pathBuilder.Path);
+        var bxPath = new BxPathBuilder(BxApiEndpoint.AssetsSymbol)
+            .AddResourceId(symbol)
+            .Build();
+        
+        return await httpClient.Get<Asset>(bxPath);
     }
 }

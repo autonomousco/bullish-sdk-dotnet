@@ -1,4 +1,6 @@
-namespace Bullish.Api.Client.HttpClient;
+using System.Net;
+
+namespace Bullish.Api.Client.BxClient;
 
 public record BxHttpError
 {
@@ -21,5 +23,13 @@ public record BxHttpError
         Raw = new object(),
         ErrorCode = string.Empty,
         ErrorCodeName = string.Empty,
+    };
+    
+    public static BxHttpError Error(HttpStatusCode httpStatusCode, string message) => new()
+    {
+        Message = message,
+        Raw = new object(),
+        ErrorCode = httpStatusCode.ToString(),
+        ErrorCodeName = "HttpStatusCode",
     };
 }

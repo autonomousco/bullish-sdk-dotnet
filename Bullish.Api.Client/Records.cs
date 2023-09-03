@@ -5,6 +5,10 @@ using System.Text.Json.Serialization;
 
 namespace Bullish.Api.Client;
 
+public record BxPath(BxApiEndpoint Endpoint, string Path, bool UseAuth);
+
+public record BxEndpoint(string Path, string Version, bool UseAuth);
+
 public record BxMetadata
 {
     public required string UserId { get; init; }
@@ -33,6 +37,18 @@ public record LoginResponse
     public required string Authorizer { get; init; }
     public required string OwnerAuthorizer { get; init; }
     public required string Token { get; init; }
+}
+
+public record LogoutResponse;
+
+public record BorrowInterest
+{
+    public required string AssetId { get; set; }
+    public required string AssetSymbol { get; set; }
+    public required string BorrowedQuantity { get; set; }
+    public required string TotalBorrowedQuantity { get; set; }
+    public required DateTime CreatedAtDatetime { get; set; }
+    public required string CreatedAtTimestamp { get; set; }
 }
 
 public record Trade

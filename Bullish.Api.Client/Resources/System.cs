@@ -1,4 +1,4 @@
-using Bullish.Api.Client.HttpClient;
+using Bullish.Api.Client.BxClient;
 
 namespace Bullish.Api.Client.Resources;
 
@@ -11,8 +11,10 @@ internal static class System
     /// </summary>
     public static async Task<BxHttpResponse<BxNonce>> GetNonce(this BxHttpClient httpClient)
     {
-        var pathBuilder = new BxPathBuilder(BxApiEndpoint.Nonce);
-        return await httpClient.MakeRequest<BxNonce>(pathBuilder.Path);
+        var bxPath = new BxPathBuilder(BxApiEndpoint.Nonce)
+            .Build();
+        
+        return await httpClient.Get<BxNonce>(bxPath);
     }
     
     /// <summary>
@@ -20,7 +22,9 @@ internal static class System
     /// </summary>
     public static async Task<BxHttpResponse<ExchangeTime>> GetTime(this BxHttpClient httpClient)
     {
-        var pathBuilder = new BxPathBuilder(BxApiEndpoint.Time);
-        return await httpClient.MakeRequest<ExchangeTime>(pathBuilder.Path);
+        var bxPath = new BxPathBuilder(BxApiEndpoint.Time)
+            .Build();
+        
+        return await httpClient.Get<ExchangeTime>(bxPath);
     }
 }

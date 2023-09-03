@@ -1,4 +1,4 @@
-using Bullish.Api.Client.HttpClient;
+using Bullish.Api.Client.BxClient;
 
 namespace Bullish.Api.Client.Resources;
 
@@ -11,9 +11,13 @@ public static class Trades
     /// <param name="orderId">Unique order ID</param>
     public static async Task<BxHttpResponse<List<Trade>>> GetTrades(this BxHttpClient httpClient, string symbol, string orderId = "")
     {
-        var pathBuilder = new BxPathBuilder(BxApiEndpoint.MarketsSymbolTrades, symbol)
-            .AddQueryParam("orderId", orderId);
-        return await httpClient.MakeRequest<List<Trade>>(pathBuilder.Path);
+        // TODO: Add date filters
+        var bxPath = new BxPathBuilder(BxApiEndpoint.Trades)
+            .AddQueryParam("symbol", symbol)
+            .AddQueryParam("orderId", orderId)
+            .Build();
+        
+        return await httpClient.Get<List<Trade>>(bxPath);
     }
     
     /// <summary>
@@ -22,8 +26,9 @@ public static class Trades
     /// <param name="tradeId">The trade ID</param>
     public static async Task<BxHttpResponse<Trade>> GetTrade(this BxHttpClient httpClient, string tradeId)
     {
-        var pathBuilder = new BxPathBuilder(BxApiEndpoint.MarketsSymbolTrades, tradeId)
-            .AddQueryParam("tradeId", tradeId);
-        return await httpClient.MakeRequest<Trade>(pathBuilder.Path);
+        var bxPath = new BxPathBuilder(BxApiEndpoint.TradesTradeId)
+            .AddResourceId(tradeId)
+            .Build();
+        return await httpClient.Get<Trade>(bxPath);
     }
 }

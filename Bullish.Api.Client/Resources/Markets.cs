@@ -1,4 +1,4 @@
-using Bullish.Api.Client.HttpClient;
+using Bullish.Api.Client.BxClient;
 
 namespace Bullish.Api.Client.Resources;
 
@@ -9,8 +9,10 @@ public static class Markets
     /// </summary>
     public static async Task<BxHttpResponse<List<Market>>> GetMarkets(this BxHttpClient httpClient)
     {
-        var pathBuilder = new BxPathBuilder(BxApiEndpoint.Markets);
-        return await httpClient.MakeRequest<List<Market>>(pathBuilder.Path);
+        var bxPath = new BxPathBuilder(BxApiEndpoint.Markets)
+            .Build();
+        
+        return await httpClient.Get<List<Market>>(bxPath);
     }
 
     /// <summary>
@@ -19,8 +21,11 @@ public static class Markets
     /// <param name="symbol">Symbol to get</param>
     public static async Task<BxHttpResponse<Market>> GetMarket(this BxHttpClient httpClient, string symbol)
     {
-        var pathBuilder = new BxPathBuilder(BxApiEndpoint.MarketsSymbol, symbol);
-        return await httpClient.MakeRequest<Market>(pathBuilder.Path);
+        var bxPath = new BxPathBuilder(BxApiEndpoint.MarketsSymbol)
+            .AddResourceId(symbol)
+            .Build();
+        
+        return await httpClient.Get<Market>(bxPath);
     }
 
     /// <summary>
@@ -30,9 +35,12 @@ public static class Markets
     /// <param name="depth">Controls the number of bids/asks returned from the mid price</param>
     public static async Task<BxHttpResponse<OrderBook>> GetMarketOrderBook(this BxHttpClient httpClient, string symbol = "BTCUSD", int depth = 10)
     {
-        var pathBuilder = new BxPathBuilder(BxApiEndpoint.MarketsSymbolOrderBookHybrid, symbol)
-            .AddQueryParam("depth", depth);
-        return await httpClient.MakeRequest<OrderBook>(pathBuilder.Path);
+        var bxPath = new BxPathBuilder(BxApiEndpoint.MarketsSymbolOrderBookHybrid)
+                .AddResourceId(symbol)
+                .AddQueryParam("depth", depth)
+                .Build();
+        
+        return await httpClient.Get<OrderBook>(bxPath);
     }
     
     /// <summary>
@@ -42,8 +50,11 @@ public static class Markets
     /// <param name="symbol">Symbol to get</param>
     public static async Task<BxHttpResponse<List<MarketTrade>>> GetMarketTrades(this BxHttpClient httpClient, string symbol)
     {
-        var pathBuilder = new BxPathBuilder(BxApiEndpoint.MarketsSymbolTrades, symbol);
-        return await httpClient.MakeRequest<List<MarketTrade>>(pathBuilder.Path);
+        var bxPath = new BxPathBuilder(BxApiEndpoint.MarketsSymbolTrades)
+            .AddResourceId(symbol)
+            .Build();
+        
+        return await httpClient.Get<List<MarketTrade>>(bxPath);
     }
     
     /// <summary>
@@ -53,8 +64,11 @@ public static class Markets
     /// <param name="symbol">Symbol to get</param>
     public static async Task<BxHttpResponse<Tick>> GetMarketTick(this BxHttpClient httpClient, string symbol = "BTCUSD")
     {
-        var pathBuilder = new BxPathBuilder(BxApiEndpoint.MarketsSymbolTick, symbol);
-        return await httpClient.MakeRequest<Tick>(pathBuilder.Path);
+        var bxPath = new BxPathBuilder(BxApiEndpoint.MarketsSymbolTick)
+            .AddResourceId(symbol)
+            .Build();
+        
+        return await httpClient.Get<Tick>(bxPath);
     }
 
     /// <summary>
@@ -66,11 +80,13 @@ public static class Markets
     /// <param name="toTimestamp">End timestamp of window</param>
     public static async Task<BxHttpResponse<List<MarketCandle>>> GetMarketCandles(this BxHttpClient httpClient, string symbol, TimeBucket timeBucket, DateTime fromTimestamp, DateTime toTimestamp)
     {
-        var pathBuilder = new BxPathBuilder(BxApiEndpoint.MarketsSymbolTrades, symbol)
+        var bxPath = new BxPathBuilder(BxApiEndpoint.MarketsSymbolTrades)
+            .AddResourceId(symbol)
             .AddQueryParam(BxDateTime.GreaterThanOrEqual(fromTimestamp))
             .AddQueryParam(BxDateTime.LessThanOrEqual(toTimestamp))
-            .AddQueryParam("timeBucket", timeBucket);
+            .AddQueryParam("timeBucket", timeBucket)
+            .Build();
         
-        return await httpClient.MakeRequest<List<MarketCandle>>(pathBuilder.Path);
+        return await httpClient.Get<List<MarketCandle>>(bxPath);
     }
 }

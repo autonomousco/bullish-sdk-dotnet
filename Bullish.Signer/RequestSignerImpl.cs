@@ -281,11 +281,18 @@ internal static class RequestSignerImpl
 
     internal static bool IsCanonical(BigInteger r, BigInteger s)
     {
-        var sigData = new byte[69];
-        sigData[0] = 31;
-        Array.Copy(r.ToByteArrayUnsigned(), 0, sigData, 1, 32);
-        Array.Copy(s.ToByteArrayUnsigned(), 0, sigData, 33, 32);
-        return IsCanonical(sigData);
+        try
+        {
+            var sigData = new byte[69];
+            sigData[0] = 31;
+            Array.Copy(r.ToByteArrayUnsigned(), 0, sigData, 1, 32);
+            Array.Copy(s.ToByteArrayUnsigned(), 0, sigData, 33, 32);
+            return IsCanonical(sigData);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"{ex.Message} R:{r} ({r.ToByteArrayUnsigned().Length}), S:{s} ({s.ToByteArrayUnsigned().Length})");
+        }
     }
 
     private static bool IsCanonical(byte[] signature) =>
