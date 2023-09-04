@@ -4,14 +4,14 @@ namespace Bullish.Api.Client.BxClient;
 
 public record BxHttpError
 {
-    public required string ErrorCode { get; init; }
+    public required int ErrorCode { get; init; }
     public required string ErrorCodeName { get; init; }
     public required string Message { get; init; }
     public required object Raw { get; init; }
 
     public static BxHttpError Empty => new()
     {
-        ErrorCode = string.Empty,
+        ErrorCode = 0,
         ErrorCodeName = string.Empty,
         Message = string.Empty,
         Raw = new object(),
@@ -21,7 +21,7 @@ public record BxHttpError
     {
         Message = message,
         Raw = new object(),
-        ErrorCode = string.Empty,
+        ErrorCode = 0,
         ErrorCodeName = string.Empty,
     };
     
@@ -29,7 +29,7 @@ public record BxHttpError
     {
         Message = message,
         Raw = new object(),
-        ErrorCode = httpStatusCode.ToString(),
+        ErrorCode = (int)httpStatusCode,
         ErrorCodeName = "HttpStatusCode",
     };
 }
