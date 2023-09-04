@@ -283,10 +283,19 @@ internal static class RequestSignerImpl
     {
         try
         {
+            var rBytes = r.ToByteArrayUnsigned();
+            var sBytes = s.ToByteArrayUnsigned();
+            
+            // TODO: R and S are sometimes less than 32 bytes
+            if (rBytes.Length != 32 || sBytes.Length != 32)
+                return false;
+            
             var sigData = new byte[69];
             sigData[0] = 31;
-            Array.Copy(r.ToByteArrayUnsigned(), 0, sigData, 1, 32);
-            Array.Copy(s.ToByteArrayUnsigned(), 0, sigData, 33, 32);
+            
+            Array.Copy(rBytes, 0, sigData, 1, 32);
+            Array.Copy(sBytes, 0, sigData, 33, 32);
+            
             return IsCanonical(sigData);
         }
         catch (Exception ex)
