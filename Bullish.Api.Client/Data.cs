@@ -7,6 +7,14 @@ public enum OrderSide
     Sell
 }
 
+public enum OrderTimeInForce
+{
+    None = 0,
+    Gtc,
+    Fok,
+    Ioc,
+}
+
 public enum AmmInstructionStatus
 {
     None,
@@ -74,6 +82,8 @@ public enum BxApiEndpoint
     HistoryBorrowInterest,
     MarketsSymbolTick,
     MarketsSymbolCandle,
+    CommandCancelAllOpenOrders,
+    CommandCancelAllOpenOrdersByMarket,
 }
 
 public static class Data
@@ -118,5 +128,7 @@ public static class Data
         { BxApiEndpoint.HistoryBorrowInterest, new BxEndpoint("/history/borrow-interest", "/v1", true) },
         { BxApiEndpoint.MarketsSymbolTick, new BxEndpoint("/markets/{symbol}/tick", "/v1", false) },
         { BxApiEndpoint.MarketsSymbolCandle, new BxEndpoint("/markets/{symbol}/candle", "/v1", false) },
+        { BxApiEndpoint.CommandCancelAllOpenOrders, new BxEndpoint("/command?commandType=V1CancelAllOrders", "/v1", true) },
+        { BxApiEndpoint.CommandCancelAllOpenOrdersByMarket, new BxEndpoint("/command?commandType=V1CancelAllOrdersByMarket", "/v1", true) },
     };
 }

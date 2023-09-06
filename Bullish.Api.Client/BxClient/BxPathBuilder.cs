@@ -68,6 +68,7 @@ public class BxPathBuilder
         {
             true when value is TimeBucket bucket => bucket.ToBxTimeBucket(),
             true => Convert.ToInt32(value) == 0 ? string.Empty : valueStr.ToUpperInvariant(),
+            false when value is bool => valueStr.ToLowerInvariant(),
             false => valueStr,
         };
 
@@ -79,7 +80,7 @@ public class BxPathBuilder
         if (string.IsNullOrWhiteSpace(value))
             return this;
 
-        var prefix = _components.Any(i => i.StartsWith("?")) ? "&" : "?";
+        var prefix = _components.Any(i => i.Contains('?')) ? "&" : "?";
 
         _components.Add($"{prefix}{name}={value}");
 

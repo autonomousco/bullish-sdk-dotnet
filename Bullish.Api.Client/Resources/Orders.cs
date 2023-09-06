@@ -39,4 +39,25 @@ public static class Orders
 
         return await httpClient.Get<Order>(bxPath);
     }
+
+    public static async Task<BxHttpResponse<CancelAllOrdersResponse>> CancelAllOpenOrders(this BxHttpClient httpClient, string tradingAccountId)
+    {
+        var bxPath = new BxPathBuilder(BxApiEndpoint.CommandCancelAllOpenOrders)
+            .Build();
+
+        var commandRequest = httpClient.GetCommandRequest();
+
+        var request = new CancelAllOrdersRequest
+        {
+            Timestamp = commandRequest.Timestamp,
+            Nonce = commandRequest.Nonce,
+            Authorizer = commandRequest.Authorizer,
+            Command = new CancelAllOrdersCommand
+            {
+                 TradingAccountId = tradingAccountId,
+            }
+        };
+
+        return await httpClient.Post<CancelAllOrdersResponse, CancelAllOrdersRequest>(bxPath, request);
+    }
 }

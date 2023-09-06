@@ -7,7 +7,7 @@ internal record BxNonce
 
     public long Value { get; private set; } = -1;
 
-    public static BxNonce Empty => new BxNonce
+    public static BxNonce Empty => new()
     {
         UpperBound = 0,
         LowerBound = 0,

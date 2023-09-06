@@ -1,21 +1,29 @@
 using System.Net.Http.Headers;
 using System.Text.Json.Nodes;
 using Bullish.Api.Client.Resources;
+using Bullish.Signer;
 
 namespace Bullish.Api.Client.BxClient;
 
 public class BxHttpClient
 {
-    private record EmptyPayload;
-
-    private readonly BxMetadata _bxMetadata;
     private readonly string _publicKey;
     private readonly string _privateKey;
+    private readonly BxMetadata _bxMetadata;
 
     private string _apiServer;
 
-    // private BxNonce _bxNonce = BxNonce.Empty;
+    private BxNonce _bxNonce = BxNonce.Empty;
     private BxAuthToken _bxAuthToken = BxAuthToken.Empty;
+    private string _authorizer = string.Empty;
+    private string _ownerAuthorizer = string.Empty;
+
+    public CommandRequest GetCommandRequest() => new()
+    {
+        Timestamp = DateTime.UtcNow.ToUnixTimeMilliseconds().ToString(),
+        Nonce = $"{_bxNonce.NextValue()}",
+        Authorizer = _authorizer,
+    };
 
     public BxHttpClient(string publicKey, string privateKey, string metadata)
     {
@@ -28,13 +36,90 @@ public class BxHttpClient
         _apiServer = Data.BxApiServers[BxApiServer.Production];
     }
 
-    public BxHttpClient ConfigureApiServer(BxApiServer apiServer)
+    public BxHttpClient ConfigureApi(BxApiServer apiServer)
     {
         _apiServer = Data.BxApiServers[apiServer];
         return this;
     }
 
-    public Task<BxHttpResponse<TResult>> Post<TResult>(BxPath path) => Post<TResult, EmptyPayload>(path, new EmptyPayload());
+    /// <summary>
+    /// The API uses bearer based authentication. A JWT token is valid for 24 hours only.
+    /// Sessions are currently tracked per user, and each user is allowed to create a maximum of 500 concurrent sessions.
+    /// If a user exceeds this limit, an error (MAX_SESSION_COUNT_REACHED) is returned on the subsequent login requests.
+    /// In order to free up unused sessions, users must logout.
+    /// </summary>
+    /// <param name="storeResult">Store the resulting JWT and Nonce in the BxHttpClient instance?</param>
+    public async Task<BxHttpResponse<LoginResponse>> Login(bool storeResult = true)
+    {
+        await UpdateNonce();
+
+        var utcNow = DateTimeOffset.UtcNow;
+        var nonce = utcNow.ToUnixTimeSeconds();
+        var expirationTime = nonce + 300;
+
+        var loginPayload = new LoginPayload
+        {
+            UserId = _bxMetadata.UserId,
+            Nonce = nonce,
+            ExpirationTime = expirationTime,
+            BiometricsUsed = false,
+            SessionKey = null,
+        };
+
+        var payloadJson = Extensions.Serialize(loginPayload);
+
+        var signature = RequestSigner.Sign(_privateKey, _publicKey, payloadJson);
+
+        var login = new Login
+        {
+            PublicKey = _publicKey,
+            LoginPayload = loginPayload,
+            Signature = signature,
+        };
+
+        var bxPath = new BxPathBuilder(BxApiEndpoint.Login)
+            .Build();
+
+        var url = $"{_apiServer}{bxPath.Path}";
+
+        var httpClient = new HttpClient();
+
+        var bodyJson = Extensions.Serialize(login);
+
+        var response = await httpClient.PostAsync(url, new StringContent(bodyJson, new MediaTypeHeaderValue("application/json")));
+
+        var loginResponse = await ProcessResponse<LoginResponse>(response);
+
+        if (loginResponse.IsSuccess && storeResult)
+        {
+            _bxAuthToken = BxAuthToken.New(loginResponse.Result!.Token);
+            _authorizer = loginResponse.Result.Authorizer;
+            _ownerAuthorizer = loginResponse.Result.OwnerAuthorizer;
+        }
+
+        return loginResponse;
+    }
+
+    /// <summary>
+    /// Users can better manage their sessions by logging out of unused sessions. 
+    /// </summary>
+    public async Task<BxHttpResponse<LogoutResponse>> Logout()
+    {
+        var bxPath = new BxPathBuilder(BxApiEndpoint.Logout)
+            .Build();
+
+        var logoutResponse = await Get<LogoutResponse>(bxPath);
+
+        if (logoutResponse.IsSuccess)
+        {
+            _bxNonce = BxNonce.Empty;
+            _bxAuthToken = BxAuthToken.Empty;
+            _authorizer = string.Empty;
+            _ownerAuthorizer = string.Empty;
+        }
+
+        return logoutResponse;
+    }
 
     public async Task<BxHttpResponse<TResult>> Post<TResult, TPayload>(BxPath path, TPayload payload)
     {
@@ -42,28 +127,21 @@ public class BxHttpClient
 
         var httpClient = new HttpClient();
 
-        if (payload is null)
-            throw new Exception("Payload cannot be null");
+        if (payload is not ICommandRequest commandRequest)
+            throw new Exception("Validated POST requests must use a CommandRequest object,");
 
-        var bodyJson = payload is EmptyPayload ? "{}" : Extensions.Serialize(payload);
+        if (!_bxAuthToken.IsValid)
+            throw new Exception("No valid JWT was found. Please login.");
 
-        if (path.UseAuth)
-        {
-            if (!_bxAuthToken.IsValid)
-            {
-                var loginResponse = await this.Login(_publicKey, _privateKey, _bxMetadata.UserId);
+        var bodyJson = Extensions.Serialize(payload);
 
-                if (!loginResponse.IsSuccess)
-                    return BxHttpResponse<TResult>.Failure(loginResponse.Error);
+        var signature = RequestSigner.Sign(_privateKey, _publicKey, bodyJson);
 
-                if (loginResponse.Result is null)
-                    return BxHttpResponse<TResult>.Failure("Response did not contain a valid JWT token");
-
-                _bxAuthToken = BxAuthToken.New(loginResponse.Result.Token);
-            }
-
-            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _bxAuthToken.Jwt);
-        }
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _bxAuthToken.Jwt);
+        httpClient.DefaultRequestHeaders.Add("BX-SIGNATURE", signature);
+        httpClient.DefaultRequestHeaders.Add("BX-TIMESTAMP", commandRequest.Timestamp);
+        httpClient.DefaultRequestHeaders.Add("BX-NONCE", commandRequest.Nonce);
+        httpClient.DefaultRequestHeaders.Add("BX-NONCE-WINDOW-ENABLED", "false");
 
         var response = await httpClient.PostAsync(url, new StringContent(bodyJson, new MediaTypeHeaderValue("application/json")));
 
@@ -78,22 +156,11 @@ public class BxHttpClient
 
         if (path.UseAuth)
         {
+            if (!_bxNonce.IsValid())
+                throw new Exception("No valid Nonce was found. Please login.");
+
             if (!_bxAuthToken.IsValid)
-            {
-                // If we call logout, but we are already logged out, then early out
-                if (path.Endpoint == BxApiEndpoint.Logout)
-                    return BxHttpResponse<TResult>.Success();
-
-                var loginResponse = await this.Login(_publicKey, _privateKey, _bxMetadata.UserId);
-
-                if (!loginResponse.IsSuccess)
-                    return BxHttpResponse<TResult>.Failure(loginResponse.Error);
-
-                if (loginResponse.Result is null)
-                    return BxHttpResponse<TResult>.Failure("Response did not contain a valid JWT token");
-
-                _bxAuthToken = BxAuthToken.New(loginResponse.Result.Token);
-            }
+                throw new Exception("No valid JWT was found. Please login.");
 
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _bxAuthToken.Jwt);
         }
@@ -114,10 +181,10 @@ public class BxHttpClient
             var jsonNode = JsonNode.Parse(json);
 
             json = jsonNode?["data"]?.ToJsonString();
-            
+
             if (string.IsNullOrWhiteSpace(json))
                 return BxHttpResponse<TResult>.Failure("Failed to get data from paginated result.");
-            
+
             var linksJson = jsonNode?["links"]?.ToJsonString();
 
             if (string.IsNullOrWhiteSpace(linksJson))
@@ -143,9 +210,24 @@ public class BxHttpClient
             var bxHttpError = Extensions.Deserialize<BxHttpError>(json) ?? BxHttpError.Error("Unknown error");
             return BxHttpResponse<TResult>.Failure(bxHttpError);
         }
-        catch
+        catch (Exception ex)
         {
+            Console.WriteLine(ex.Message);
             return BxHttpResponse<TResult>.Failure(BxHttpError.Error(response.StatusCode, json));
         }
+    }
+
+    private async Task UpdateNonce()
+    {
+        // Configure the nonce
+        var nonceResponse = await this.GetNonce();
+
+        if (!nonceResponse.IsSuccess)
+            throw new Exception($"Failed to get Nonce. Reason:{nonceResponse.Error.Message}");
+
+        if (nonceResponse.Result is null)
+            throw new Exception("Response did not contain a valid Nonce.");
+
+        _bxNonce = nonceResponse.Result;
     }
 }

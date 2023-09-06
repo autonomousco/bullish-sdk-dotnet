@@ -5,6 +5,47 @@ using System.Text.Json.Serialization;
 
 namespace Bullish.Api.Client;
 
+public interface ICommandRequest
+{
+    public string Timestamp { get; }
+    public string Nonce { get; }
+    public string Authorizer { get; }
+}
+
+public record CommandRequest : ICommandRequest
+{
+    public required string Timestamp { get; init; }
+    public required string Nonce { get; init; }
+    public required string Authorizer { get; init; }
+}
+
+public record CancelAllOrdersCommand
+{
+    public string CommandType => "V1CancelAllOrders";
+
+    public required string TradingAccountId { get; init; }
+}
+
+public record CancelAllOrdersRequest : ICommandRequest
+{
+    public required string Timestamp { get; init; }
+    public required string Nonce { get; init; }
+    public required string Authorizer { get; init; }
+
+    public required CancelAllOrdersCommand Command { get; init; }
+}
+
+public record CancelAllOrdersResponse
+{
+    public required string Message { get; set; }
+    public required string RequestId { get; set; }
+    
+    // Returned but unused
+    // public required object OrderId { get; set; }
+    // public required object Handle { get; set; }
+    // public required bool Test { get; set; }
+}
+
 public record BxPath(BxApiEndpoint Endpoint, string Path, bool UseAuth, bool UsePagination);
 
 public record BxEndpoint(string Path, string Version, bool UseAuth);
@@ -14,7 +55,7 @@ public record BxPageLinks(string Next, string Previous)
     public static BxPageLinks Empty => new(string.Empty, string.Empty);
 
     public BxPageLink NextPage => new("_nextPage", GetPageHash(Next));
-    
+
     public BxPageLink PrevPage => new("_previousPage", GetPageHash(Previous));
 
     private static string GetPageHash(string url)
@@ -284,6 +325,7 @@ public record WalletWithdrawalLimit
     public required string Available { get; init; }
     public required string TwentyFourHour { get; init; }
 }
+
 public record WalletDepositCrypto
 {
     public required string Network { get; set; }
@@ -373,13 +415,11 @@ public record AmmInstruction
     public required int StatusReasonCode { get; init; }
     public required DateTime CreatedAtDatetime { get; init; }
     public required string CreatedAtTimestamp { get; init; }
- 
-    [JsonPropertyName("24HrApy")]
-    public required string TwentyFourHrApy { get; init; }
 
-    [JsonPropertyName("24HrYieldEarn")]
-    public required string TwentyFourHrYieldEarn { get; init; }
-    
+    [JsonPropertyName("24HrApy")] public required string TwentyFourHrApy { get; init; }
+
+    [JsonPropertyName("24HrYieldEarn")] public required string TwentyFourHrYieldEarn { get; init; }
+
     public required string Apy { get; init; }
     public required string BaseCurrentQuantity { get; init; }
     public required string BaseInvestQuantity { get; init; }
@@ -406,4 +446,3 @@ public record AmmInstruction
     public required string UpperBound { get; init; }
     public required string YieldEarn { get; init; }
 }
-

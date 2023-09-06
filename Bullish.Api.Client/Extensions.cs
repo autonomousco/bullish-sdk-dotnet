@@ -45,6 +45,14 @@ internal static class Extensions
         return new DateTimeOffset(dateTime).ToUnixTimeMilliseconds() * 1000;
     }
     
+    public static long ToUnixTimeMilliseconds(this DateTime dateTime)
+    {
+        if (dateTime.Kind != DateTimeKind.Utc)
+            throw new ArgumentException("Must be DateTimeKind.Utc", nameof(dateTime));
+        
+        return new DateTimeOffset(dateTime).ToUnixTimeMilliseconds();
+    }
+    
     private static JsonSerializerOptions GetJsonSerializerOptions(bool writeIndented = false)
     {
         var jsonSerializerOptions = new JsonSerializerOptions
