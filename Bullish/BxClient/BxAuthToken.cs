@@ -1,4 +1,4 @@
-namespace Bullish.Api.Client.BxClient;
+namespace Bullish.BxClient;
 
 public record BxAuthToken(string Jwt, DateTime Expiration)
 {

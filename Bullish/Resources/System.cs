@@ -1,6 +1,6 @@
-using Bullish.Api.Client.BxClient;
+using Bullish.BxClient;
 
-namespace Bullish.Api.Client.Resources;
+namespace Bullish.Resources;
 
 internal static class System
 {

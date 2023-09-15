@@ -1,9 +1,9 @@
 using System.Net.Http.Headers;
 using System.Text.Json.Nodes;
-using Bullish.Api.Client.Resources;
+using Bullish.Resources;
 using Bullish.Signer;
 
-namespace Bullish.Api.Client.BxClient;
+namespace Bullish.BxClient;
 
 public class BxHttpClient
 {
@@ -35,14 +35,14 @@ public class BxHttpClient
         _publicKey = publicKey;
 
         // Set the default API server to Production
-        _apiServer = Data.BxApiServers[BxApiServer.Production];
+        _apiServer = Constants.BxApiServers[BxApiServer.Production];
 
         _autoLogin = autoLogin;
     }
 
     public BxHttpClient ConfigureApi(BxApiServer apiServer)
     {
-        _apiServer = Data.BxApiServers[apiServer];
+        _apiServer = Constants.BxApiServers[apiServer];
         return this;
     }
 

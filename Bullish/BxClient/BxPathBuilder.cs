@@ -1,4 +1,4 @@
-namespace Bullish.Api.Client.BxClient;
+namespace Bullish.BxClient;
 
 
 public class BxPathBuilder
@@ -15,7 +15,7 @@ public class BxPathBuilder
     {
         _endpoint = endpoint;
        
-        _bxEndpoint = Data.BxApiEndpoints[endpoint];
+        _bxEndpoint = Constants.BxApiEndpoints[endpoint];
        
         _components.Add(_bxEndpoint.Version);
         

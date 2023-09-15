@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 [assembly: InternalsVisibleTo("ApiTester")]
 
-namespace Bullish.Api.Client;
+namespace Bullish;
 
 public interface ICommandRequest
 {

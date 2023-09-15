@@ -2,7 +2,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Bullish.Api.Client;
+namespace Bullish;
 
 internal static class Extensions
 {

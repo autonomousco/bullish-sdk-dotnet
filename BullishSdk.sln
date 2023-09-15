@@ -4,7 +4,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bullish.Signer", "Bullish.S
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bullish.Signer.Tests", "Bullish.Signer.Tests\Bullish.Signer.Tests.csproj", "{874B6752-24E5-4BC8-BF47-D251CA156611}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bullish.Api.Client", "Bullish.Api.Client\Bullish.Api.Client.csproj", "{E5D1429D-CC93-4001-9F22-BE58AB6C8FA2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bullish.Api.Client", "Bullish\Bullish.csproj", "{E5D1429D-CC93-4001-9F22-BE58AB6C8FA2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

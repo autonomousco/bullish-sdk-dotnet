@@ -1,4 +1,4 @@
-namespace Bullish.Api.Client.BxClient;
+namespace Bullish.BxClient;
 
 internal record BxNonce
 {
