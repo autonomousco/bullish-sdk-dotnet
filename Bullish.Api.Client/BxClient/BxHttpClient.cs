@@ -10,14 +10,16 @@ public class BxHttpClient
     private readonly string _publicKey;
     private readonly string _privateKey;
     private readonly BxMetadata _bxMetadata;
+    private readonly bool _autoLogin;
 
     private string _apiServer;
 
     private BxNonce _bxNonce = BxNonce.Empty;
     private BxAuthToken _bxAuthToken = BxAuthToken.Empty;
     private string _authorizer = string.Empty;
-    private string _ownerAuthorizer = string.Empty;
+    private Dictionary<string, Market> _markets = new();
 
+    // TODO: This needs to be refactored into a CommandBuilder pattern
     public CommandRequest GetCommandRequest() => new()
     {
         Timestamp = DateTime.UtcNow.ToUnixTimeMilliseconds().ToString(),
@@ -25,7 +27,7 @@ public class BxHttpClient
         Authorizer = _authorizer,
     };
 
-    public BxHttpClient(string publicKey, string privateKey, string metadata)
+    public BxHttpClient(string publicKey, string privateKey, string metadata, bool autoLogin = true)
     {
         _bxMetadata = Extensions.DeserializeBase64<BxMetadata>(metadata) ?? throw new ArgumentException("Invalid metadata");
 
@@ -34,12 +36,36 @@ public class BxHttpClient
 
         // Set the default API server to Production
         _apiServer = Data.BxApiServers[BxApiServer.Production];
+
+        _autoLogin = autoLogin;
     }
 
     public BxHttpClient ConfigureApi(BxApiServer apiServer)
     {
         _apiServer = Data.BxApiServers[apiServer];
         return this;
+    }
+
+    internal async Task<decimal> FormatValue(PrecisionType type, string symbol, decimal value)
+    {
+        if (!_markets.ContainsKey(symbol))
+            await UpdateMarkets();
+
+        if (!_markets.TryGetValue(symbol, out var market))
+            throw new Exception($"Cannot find market for symbol {symbol}");
+
+        var precision = value.GetDecimalPlaces();
+        var desiredPrecision = type switch
+        {
+            PrecisionType.BasePrecision => market.BasePrecision,
+            PrecisionType.QuotePrecision => market.QuotePrecision,
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
+
+        if (precision > desiredPrecision)
+            throw new Exception($"Value {value} has {type} of {precision}. Must be {desiredPrecision} or less to avoid overflow.");
+
+        return decimal.Parse(value.ToString($"F{desiredPrecision}"));
     }
 
     /// <summary>
@@ -92,9 +118,9 @@ public class BxHttpClient
 
         if (loginResponse.IsSuccess && storeResult)
         {
-            _bxAuthToken = BxAuthToken.New(loginResponse.Result!.Token);
+            _bxAuthToken = new BxAuthToken(loginResponse.Result!.Token);
             _authorizer = loginResponse.Result.Authorizer;
-            _ownerAuthorizer = loginResponse.Result.OwnerAuthorizer;
+            // _ownerAuthorizer = loginResponse.Result.OwnerAuthorizer;
         }
 
         return loginResponse;
@@ -115,7 +141,7 @@ public class BxHttpClient
             _bxNonce = BxNonce.Empty;
             _bxAuthToken = BxAuthToken.Empty;
             _authorizer = string.Empty;
-            _ownerAuthorizer = string.Empty;
+            // _ownerAuthorizer = string.Empty;
         }
 
         return logoutResponse;
@@ -131,7 +157,12 @@ public class BxHttpClient
             throw new Exception("Validated POST requests must use a CommandRequest object,");
 
         if (!_bxAuthToken.IsValid)
-            throw new Exception("No valid JWT was found. Please login.");
+        {
+            if (_autoLogin)
+                await Login();
+            else
+                throw new Exception("No valid JWT was found. Please login.");
+        }
 
         var bodyJson = Extensions.Serialize(payload);
 
@@ -156,11 +187,16 @@ public class BxHttpClient
 
         if (path.UseAuth)
         {
+            if (!_bxAuthToken.IsValid)
+            {
+                if (_autoLogin)
+                    await Login();
+                else
+                    throw new Exception("No valid JWT was found. Please login.");
+            }
+
             if (!_bxNonce.IsValid())
                 throw new Exception("No valid Nonce was found. Please login.");
-
-            if (!_bxAuthToken.IsValid)
-                throw new Exception("No valid JWT was found. Please login.");
 
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _bxAuthToken.Jwt);
         }
@@ -215,6 +251,19 @@ public class BxHttpClient
             Console.WriteLine(ex.Message);
             return BxHttpResponse<TResult>.Failure(BxHttpError.Error(response.StatusCode, json));
         }
+    }
+
+    private async Task UpdateMarkets()
+    {
+        var marketsResponse = await this.GetMarkets();
+
+        if (!marketsResponse.IsSuccess)
+            throw new Exception($"Failed to get Markets. Reason:{marketsResponse.Error.Message}");
+
+        if (marketsResponse.Result is null)
+            throw new Exception("Response did not contain a valid list of Markets.");
+
+        _markets = marketsResponse.Result.ToDictionary(key => key.Symbol, value => value);
     }
 
     private async Task UpdateNonce()

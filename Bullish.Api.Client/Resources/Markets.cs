@@ -33,7 +33,7 @@ public static class Markets
     /// </summary>
     /// <param name="symbol">Symbol to get</param>
     /// <param name="depth">Controls the number of bids/asks returned from the mid price</param>
-    public static async Task<BxHttpResponse<OrderBook>> GetMarketOrderBook(this BxHttpClient httpClient, string symbol = "BTCUSD", int depth = 10)
+    public static async Task<BxHttpResponse<OrderBook>> GetMarketOrderBook(this BxHttpClient httpClient, string symbol, int depth = 10)
     {
         var bxPath = new BxPathBuilder(BxApiEndpoint.MarketsSymbolOrderBookHybrid)
                 .AddResourceId(symbol)
@@ -62,7 +62,7 @@ public static class Markets
     /// Return top 100.
     /// </summary>
     /// <param name="symbol">Symbol to get</param>
-    public static async Task<BxHttpResponse<Tick>> GetMarketTick(this BxHttpClient httpClient, string symbol = "BTCUSD")
+    public static async Task<BxHttpResponse<Tick>> GetMarketTick(this BxHttpClient httpClient, string symbol)
     {
         var bxPath = new BxPathBuilder(BxApiEndpoint.MarketsSymbolTick)
             .AddResourceId(symbol)

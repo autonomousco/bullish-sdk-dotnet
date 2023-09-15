@@ -9,6 +9,7 @@ public record BxHttpError
     public required string Message { get; init; }
     public required object Raw { get; init; }
 
+    // TODO: Update various constructors to Record style :this() { }
     public static BxHttpError Empty => new()
     {
         ErrorCode = 0,

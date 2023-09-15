@@ -1,10 +1,24 @@
 namespace Bullish.Api.Client;
 
+public enum PrecisionType
+{
+    BasePrecision,
+    QuotePrecision,
+}
+
 public enum OrderSide
 {
     None = 0,
     Buy,
     Sell
+}
+
+public enum OrderType
+{
+    None = 0,
+    Lmt,
+    Mkt,
+    STOP_LIMIT,
 }
 
 public enum OrderTimeInForce

@@ -1,21 +1,12 @@
 namespace Bullish.Api.Client.BxClient;
 
-public record BxAuthToken
+public record BxAuthToken(string Jwt, DateTime Expiration)
 {
-    public required string Jwt { get; init; }
-    public required DateTime Expiration { get; init; }
+    private BxAuthToken() : this(string.Empty, DateTime.MinValue) { }
+    
+    public BxAuthToken(string jwt) : this(jwt, DateTime.UtcNow.AddHours(23)) { }
 
-    public static BxAuthToken New(string jwt) => new()
-    {
-        Jwt = jwt,
-        Expiration = DateTime.UtcNow.AddHours(23),
-    };
-
-    public static BxAuthToken Empty => new()
-    {
-        Jwt = string.Empty,
-        Expiration = DateTime.MinValue,
-    };
+    public static BxAuthToken Empty => new();
     
     public bool IsValid => DateTime.UtcNow < Expiration;
 }

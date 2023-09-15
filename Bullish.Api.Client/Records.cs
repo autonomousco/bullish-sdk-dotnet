@@ -22,7 +22,6 @@ public record CommandRequest : ICommandRequest
 public record CancelAllOrdersCommand
 {
     public string CommandType => "V1CancelAllOrders";
-
     public required string TradingAccountId { get; init; }
 }
 
@@ -31,19 +30,63 @@ public record CancelAllOrdersRequest : ICommandRequest
     public required string Timestamp { get; init; }
     public required string Nonce { get; init; }
     public required string Authorizer { get; init; }
-
     public required CancelAllOrdersCommand Command { get; init; }
 }
 
 public record CancelAllOrdersResponse
 {
-    public required string Message { get; set; }
-    public required string RequestId { get; set; }
-    
+    public required string Message { get; init; }
+    public required string RequestId { get; init; }
+
     // Returned but unused
-    // public required object OrderId { get; set; }
-    // public required object Handle { get; set; }
-    // public required bool Test { get; set; }
+    // public required object OrderId { get; init; }
+    // public required object Handle { get; init; }
+    // public required bool Test { get; init; }
+}
+
+public record CancelAllOrdersByMarketRequest : ICommandRequest
+{
+    public required string Timestamp { get; init; }
+    public required string Nonce { get; init; }
+    public required string Authorizer { get; init; }
+    public required CancelAllOrdersCommandByMarket Command { get; init; }
+}
+
+public record CancelAllOrdersCommandByMarket
+{
+    public string CommandType => "V1CancelAllOrdersByMarket";
+    public required string Symbol { get; init; }
+    public required string TradingAccountId { get; init; }
+}
+
+public record CreateOrderRequest : ICommandRequest
+{
+    public required string Timestamp { get; init; }
+    public required string Nonce { get; init; }
+    public required string Authorizer { get; init; }
+    public required CreateOrderCommand Command { get; init; }
+}
+
+public record CreateOrderCommand
+{
+    public string CommandType => "V1CreateOrder";
+    public required string? Handle { get; init; }
+    public required string Symbol { get; init; }
+    public required string Type { get; init; }
+    public required string Side { get; init; }
+    public required string? Price { get; init; }
+    public required string? StopPrice { get; init; }
+    public required string Quantity { get; init; }
+    public required string? TimeInForce { get; init; }
+    public required bool AllowMargin { get; init; }
+}
+
+public record CreateOrderResponse
+{
+    public required string Message { get; init; }
+    public required string RequestId { get; init; }
+    public required string OrderId { get; init; }
+    public required bool Test { get; init; }
 }
 
 public record BxPath(BxApiEndpoint Endpoint, string Path, bool UseAuth, bool UsePagination);
@@ -104,12 +147,12 @@ public record LogoutResponse;
 
 public record BorrowInterest
 {
-    public required string AssetId { get; set; }
-    public required string AssetSymbol { get; set; }
-    public required string BorrowedQuantity { get; set; }
-    public required string TotalBorrowedQuantity { get; set; }
-    public required DateTime CreatedAtDatetime { get; set; }
-    public required string CreatedAtTimestamp { get; set; }
+    public required string AssetId { get; init; }
+    public required string AssetSymbol { get; init; }
+    public required string BorrowedQuantity { get; init; }
+    public required string TotalBorrowedQuantity { get; init; }
+    public required DateTime CreatedAtDatetime { get; init; }
+    public required string CreatedAtTimestamp { get; init; }
 }
 
 public record Trade
@@ -328,59 +371,59 @@ public record WalletWithdrawalLimit
 
 public record WalletDepositCrypto
 {
-    public required string Network { get; set; }
-    public required string Symbol { get; set; }
-    public required string Address { get; set; }
+    public required string Network { get; init; }
+    public required string Symbol { get; init; }
+    public required string Address { get; init; }
 }
 
 public record WalletWithdrawalCrypto
 {
-    public required string Network { get; set; }
-    public required string Symbol { get; set; }
-    public required string Address { get; set; }
-    public required string Fee { get; set; }
-    public required string Memo { get; set; }
-    public required string Label { get; set; }
-    public required string DestinationId { get; set; }
+    public required string Network { get; init; }
+    public required string Symbol { get; init; }
+    public required string Address { get; init; }
+    public required string Fee { get; init; }
+    public required string Memo { get; init; }
+    public required string Label { get; init; }
+    public required string DestinationId { get; init; }
 }
 
 public record IntermediaryBank
 {
-    public required string Name { get; set; }
-    public required string PhysicalAddress { get; set; }
-    public required string RoutingCode { get; set; }
+    public required string Name { get; init; }
+    public required string PhysicalAddress { get; init; }
+    public required string RoutingCode { get; init; }
 }
 
 public record WalletWithdrawalFiat
 {
-    public required string DestinationId { get; set; }
-    public required string AccountNumber { get; set; }
-    public required string Network { get; set; }
-    public required string Symbol { get; set; }
-    public required string Name { get; set; }
-    public required string PhysicalAddress { get; set; }
-    public required string Fee { get; set; }
-    public required string Memo { get; set; }
-    public required Bank Bank { get; set; }
-    public required IntermediaryBank IntermediaryBank { get; set; }
+    public required string DestinationId { get; init; }
+    public required string AccountNumber { get; init; }
+    public required string Network { get; init; }
+    public required string Symbol { get; init; }
+    public required string Name { get; init; }
+    public required string PhysicalAddress { get; init; }
+    public required string Fee { get; init; }
+    public required string Memo { get; init; }
+    public required Bank Bank { get; init; }
+    public required IntermediaryBank IntermediaryBank { get; init; }
 }
 
 public record Bank
 {
-    public required string Name { get; set; }
-    public required string PhysicalAddress { get; set; }
-    public required string RoutingCode { get; set; }
+    public required string Name { get; init; }
+    public required string PhysicalAddress { get; init; }
+    public required string RoutingCode { get; init; }
 }
 
 public record WalletDepositFiat
 {
-    public required string Network { get; set; }
-    public required string Symbol { get; set; }
-    public required string AccountNumber { get; set; }
-    public required string Name { get; set; }
-    public required string PhysicalAddress { get; set; }
-    public required string Memo { get; set; }
-    public required Bank Bank { get; set; }
+    public required string Network { get; init; }
+    public required string Symbol { get; init; }
+    public required string AccountNumber { get; init; }
+    public required string Name { get; init; }
+    public required string PhysicalAddress { get; init; }
+    public required string Memo { get; init; }
+    public required Bank Bank { get; init; }
 }
 
 public record WalletTransaction
