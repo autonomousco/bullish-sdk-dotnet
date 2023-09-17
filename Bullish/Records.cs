@@ -86,37 +86,6 @@ public record CreateOrderResponse
     public required bool Test { get; init; }
 }
 
-internal record BxPath(BxApiEndpoint Endpoint, string Path, bool UseAuth, bool UsePagination);
-
-public record BxEndpoint(string Path, string Version, bool UseAuth);
-
-public record BxPageLinks(string Next, string Previous)
-{
-    public static BxPageLinks Empty => new(string.Empty, string.Empty);
-
-    public BxPageLink NextPage => new("_nextPage", GetPageHash(Next));
-
-    public BxPageLink PrevPage => new("_previousPage", GetPageHash(Previous));
-
-    private static string GetPageHash(string url)
-    {
-        var index = url.LastIndexOf("=", StringComparison.Ordinal) + 1;
-        return url[index..];
-    }
-}
-
-public record BxPageLink(string Name, string Value)
-{
-    public static BxPageLink Empty => new(string.Empty, string.Empty);
-}
-
-public record BxMetadata(string UserId,string PublicKey,string CredentialId )
-{
-    private BxMetadata() : this(string.Empty,string.Empty, string.Empty) { }
-
-    public static BxMetadata Empty => new();
-}
-
 public record LoginPayload
 {
     public required string UserId { get; init; }

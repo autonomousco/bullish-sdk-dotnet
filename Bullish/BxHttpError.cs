@@ -2,7 +2,7 @@ using System.Net;
 
 namespace Bullish;
 
-public record BxHttpError
+public sealed record BxHttpError
 {
     public required int ErrorCode { get; init; }
     public required string ErrorCodeName { get; init; }

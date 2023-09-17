@@ -1,6 +1,6 @@
 namespace Bullish;
 
-internal record BxAuthToken(string Jwt, DateTime Expiration)
+internal sealed record BxAuthToken(string Jwt, DateTime Expiration)
 {
     private BxAuthToken() : this(string.Empty, DateTime.MinValue) { }
     

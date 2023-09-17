@@ -1,6 +1,6 @@
 namespace Bullish;
 
-internal record BxDateTime
+internal sealed record BxDateTime
 {
     private readonly Type _type;
     private readonly DateTime _timestamp;

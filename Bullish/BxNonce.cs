@@ -1,6 +1,6 @@
 namespace Bullish;
 
-internal record BxNonce
+internal sealed record BxNonce
 {
     public required long LowerBound { get; init; }
     public required long UpperBound { get; init; }

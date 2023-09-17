@@ -1,6 +1,6 @@
 namespace Bullish;
 
-internal class BxPathBuilder
+internal sealed class BxPathBuilder
 {
     private readonly BxApiEndpoint _endpoint;
 

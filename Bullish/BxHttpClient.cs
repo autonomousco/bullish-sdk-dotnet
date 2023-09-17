@@ -4,7 +4,7 @@ using Bullish.Signer;
 
 namespace Bullish;
 
-public class BxHttpClient
+public sealed class BxHttpClient
 {
     private string _publicKey = string.Empty;
     private string _privateKey= string.Empty;

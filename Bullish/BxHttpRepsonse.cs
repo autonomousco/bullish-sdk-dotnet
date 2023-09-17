@@ -1,6 +1,6 @@
 namespace Bullish;
 
-public record BxHttpResponse<T>
+public sealed record BxHttpResponse<T>
 {
     public required bool IsSuccess { get; init; }
     public required T? Result { get; init; }
