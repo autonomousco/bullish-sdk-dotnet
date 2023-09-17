@@ -1,7 +1,6 @@
-namespace Bullish.BxClient;
+namespace Bullish;
 
-
-public class BxPathBuilder
+internal class BxPathBuilder
 {
     private readonly BxApiEndpoint _endpoint;
 

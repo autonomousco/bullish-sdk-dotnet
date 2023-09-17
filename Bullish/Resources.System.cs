@@ -1,8 +1,6 @@
-using Bullish.BxClient;
+namespace Bullish;
 
-namespace Bullish.Resources;
-
-internal static class System
+internal static class ResourcesInternal
 {
     /// <summary>
     /// Get the current nonce range.

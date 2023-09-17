@@ -1,8 +1,6 @@
-using Bullish.BxClient;
+namespace Bullish;
 
-namespace Bullish.Resources;
-
-public static class Accounts
+public static partial class Resources
 {
     /// <summary>
     /// Gets the asset accounts.

@@ -1,9 +1,8 @@
 using System.Globalization;
-using Bullish.BxClient;
 
-namespace Bullish.Resources;
+namespace Bullish;
 
-public static class Orders
+public static partial class Resources
 {
     /// <summary>
     /// Gets the orders list based on specified filters.

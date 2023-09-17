@@ -4,10 +4,24 @@
         <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <PackageId>Bullish.Sdk</PackageId>
+        <Title>Bullish API Client</Title>
+        <Authors>Autonomous Ltd</Authors>
+        <Description>A .NET native SDK for the Bullish Exchange https://bullish.com/</Description>
+        <PackageProjectUrl>https://github.com/autonomousco/bullish-sdk-dotnet</PackageProjectUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <RepositoryUrl>https://github.com/autonomousco/bullish-sdk-dotnet</RepositoryUrl>
+        <RepositoryType>Github</RepositoryType>
+        <PackageReleaseNotes>Initial WIP Release</PackageReleaseNotes>
+        <Copyright>Shaun Sales, Autonomous Ltd</Copyright>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\Bullish.Signer\Bullish.Signer.csproj"/>
+        <None Include="..\README.md" Pack="true" PackagePath="\"/>
     </ItemGroup>
+
+
 
 </Project>

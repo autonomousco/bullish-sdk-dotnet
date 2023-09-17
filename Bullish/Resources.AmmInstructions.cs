@@ -1,8 +1,6 @@
-using Bullish.BxClient;
+namespace Bullish;
 
-namespace Bullish.Resources;
-
-public static class AmmInstructions
+public static partial class Resources
 {
     /// <summary>
     /// Gets a list of AMM instructions based on applied filters.

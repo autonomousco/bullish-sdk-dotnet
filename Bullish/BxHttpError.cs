@@ -1,6 +1,6 @@
 using System.Net;
 
-namespace Bullish.BxClient;
+namespace Bullish;
 
 public record BxHttpError
 {

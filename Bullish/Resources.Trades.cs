@@ -1,8 +1,6 @@
-using Bullish.BxClient;
+namespace Bullish;
 
-namespace Bullish.Resources;
-
-public static class Trades
+public static partial class Resources
 {
     /// <summary>
     /// Get a list of trades based on specified filters.

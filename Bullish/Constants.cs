@@ -1,6 +1,6 @@
 namespace Bullish;
 
-public static class Constants
+internal static class Constants
 {
     public static Dictionary<BxApiServer, string> BxApiServers = new()
     {

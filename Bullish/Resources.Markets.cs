@@ -1,8 +1,6 @@
-using Bullish.BxClient;
+namespace Bullish;
 
-namespace Bullish.Resources;
-
-public static class Markets
+public static partial class Resources
 {
     /// <summary>
     /// Get Markets

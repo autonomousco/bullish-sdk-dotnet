@@ -1,8 +1,6 @@
-using Bullish.BxClient;
+namespace Bullish;
 
-namespace Bullish.Resources;
-
-public static class History
+public static partial class Resources
 {
     /// <summary>
     /// Get Historical Market Trades by Market Symbol.

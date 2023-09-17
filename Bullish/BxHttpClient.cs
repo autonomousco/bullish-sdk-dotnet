@@ -1,18 +1,17 @@
 using System.Net.Http.Headers;
 using System.Text.Json.Nodes;
-using Bullish.Resources;
 using Bullish.Signer;
 
-namespace Bullish.BxClient;
+namespace Bullish;
 
 public class BxHttpClient
 {
-    private readonly string _publicKey;
-    private readonly string _privateKey;
-    private readonly BxMetadata _bxMetadata;
-    private readonly bool _autoLogin;
+    private string _publicKey = string.Empty;
+    private string _privateKey= string.Empty;
+    private BxMetadata _bxMetadata = BxMetadata.Empty;
+    private readonly bool _autoLogin = false;
 
-    private string _apiServer;
+    private string _apiServer = Constants.BxApiServers[BxApiServer.Production];
 
     private BxNonce _bxNonce = BxNonce.Empty;
     private BxAuthToken _bxAuthToken = BxAuthToken.Empty;
@@ -27,22 +26,20 @@ public class BxHttpClient
         Authorizer = _authorizer,
     };
 
-    public BxHttpClient(string publicKey, string privateKey, string metadata, bool autoLogin = true)
+    public BxHttpClient ConfigureAuth(string publicKey, string privateKey, string metadata)
     {
-        _bxMetadata = Extensions.DeserializeBase64<BxMetadata>(metadata) ?? throw new ArgumentException("Invalid metadata");
-
         _privateKey = privateKey;
         _publicKey = publicKey;
 
-        // Set the default API server to Production
-        _apiServer = Constants.BxApiServers[BxApiServer.Production];
+        _bxMetadata = Extensions.DeserializeBase64<BxMetadata>(metadata) ?? throw new ArgumentException("Invalid metadata");
 
-        _autoLogin = autoLogin;
+        return this;
     }
-
+    
     public BxHttpClient ConfigureApi(BxApiServer apiServer)
     {
         _apiServer = Constants.BxApiServers[apiServer];
+        
         return this;
     }
 
@@ -147,7 +144,7 @@ public class BxHttpClient
         return logoutResponse;
     }
 
-    public async Task<BxHttpResponse<TResult>> Post<TResult, TPayload>(BxPath path, TPayload payload)
+    internal async Task<BxHttpResponse<TResult>> Post<TResult, TPayload>(BxPath path, TPayload payload)
     {
         var url = $"{_apiServer}{path.Path}";
 
@@ -179,7 +176,7 @@ public class BxHttpClient
         return await ProcessResponse<TResult>(response);
     }
 
-    public async Task<BxHttpResponse<TResult>> Get<TResult>(BxPath path)
+    internal async Task<BxHttpResponse<TResult>> Get<TResult>(BxPath path)
     {
         var url = $"{_apiServer}{path.Path}";
 

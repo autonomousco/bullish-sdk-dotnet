@@ -1,7 +1,4 @@
-using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
-
-[assembly: InternalsVisibleTo("ApiTester")]
 
 namespace Bullish;
 
@@ -89,7 +86,7 @@ public record CreateOrderResponse
     public required bool Test { get; init; }
 }
 
-public record BxPath(BxApiEndpoint Endpoint, string Path, bool UseAuth, bool UsePagination);
+internal record BxPath(BxApiEndpoint Endpoint, string Path, bool UseAuth, bool UsePagination);
 
 public record BxEndpoint(string Path, string Version, bool UseAuth);
 
@@ -113,11 +110,11 @@ public record BxPageLink(string Name, string Value)
     public static BxPageLink Empty => new(string.Empty, string.Empty);
 }
 
-public record BxMetadata
+public record BxMetadata(string UserId,string PublicKey,string CredentialId )
 {
-    public required string UserId { get; init; }
-    public required string PublicKey { get; init; }
-    public required string CredentialId { get; init; }
+    private BxMetadata() : this(string.Empty,string.Empty, string.Empty) { }
+
+    public static BxMetadata Empty => new();
 }
 
 public record LoginPayload
@@ -283,7 +280,7 @@ public record TradingAccount
 public record FeeTier
 {
     public required string FeeTierId { get; init; }
-    public required string StaticSpreadFee { get; init; }
+    public required decimal StaticSpreadFee { get; init; }
     public required bool IsDislocationEnabled { get; init; }
 }
 
@@ -300,15 +297,15 @@ public record Market
     public required int PricePrecision { get; init; }
     public required int QuantityPrecision { get; init; }
     public required int CostPrecision { get; init; }
-    public required string MinQuantityLimit { get; init; }
-    public required string MaxQuantityLimit { get; init; }
-    public required string MaxPriceLimit { get; init; }
-    public required string MinPriceLimit { get; init; }
-    public required string MaxCostLimit { get; init; }
-    public required string MinCostLimit { get; init; }
+    public required decimal MinQuantityLimit { get; init; }
+    public required decimal MaxQuantityLimit { get; init; }
+    public required decimal? MaxPriceLimit { get; init; }
+    public required decimal? MinPriceLimit { get; init; }
+    public required decimal? MaxCostLimit { get; init; }
+    public required decimal? MinCostLimit { get; init; }
     public required string TimeZone { get; init; }
-    public required string TickSize { get; init; }
-    public required string LiquidityTickSize { get; init; }
+    public required decimal TickSize { get; init; }
+    public required decimal LiquidityTickSize { get; init; }
     public required int LiquidityPrecision { get; init; }
     public required int MakerFee { get; init; }
     public required int TakerFee { get; init; }

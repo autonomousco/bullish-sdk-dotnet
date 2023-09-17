@@ -1,6 +1,6 @@
-namespace Bullish.BxClient;
+namespace Bullish;
 
-public record BxDateTime
+internal record BxDateTime
 {
     private readonly Type _type;
     private readonly DateTime _timestamp;

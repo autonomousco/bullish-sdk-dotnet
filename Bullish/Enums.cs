@@ -65,7 +65,7 @@ public enum BxApiServer
     SandboxRegistered,
 }
 
-public enum BxApiEndpoint
+internal enum BxApiEndpoint
 {
     Login,
     Logout,
