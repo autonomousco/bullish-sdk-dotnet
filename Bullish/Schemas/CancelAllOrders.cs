@@ -2,6 +2,6 @@ namespace Bullish.Schemas;
 
 public record CancelAllOrders
 {
-    public required string Message { get; init; }
-    public required string RequestId { get; init; }
+    public string Message { get; init; } = string.Empty;
+    public string RequestId { get; init; } = string.Empty;
 }

@@ -6,7 +6,7 @@ public class PublicEndpointTests
     public async Task GetMarkets()
     {
         var bxHttpClient = new BxHttpClient();
-
+        
         var resp = await bxHttpClient.GetMarkets();
         
         var markets = resp.Result;

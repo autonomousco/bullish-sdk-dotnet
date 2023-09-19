@@ -2,25 +2,25 @@ namespace Bullish.Schemas;
 
 public record Order
 {
-    public required string Handle { get; init; }
-    public required string OrderId { get; init; }
-    public required string Symbol { get; init; }
-    public required decimal Price { get; init; }
-    public required decimal AverageFillPrice { get; init; }
-    public required decimal StopPrice { get; init; }
-    public required bool Margin { get; init; }
-    public required decimal Quantity { get; init; }
-    public required decimal QuantityFilled { get; init; }
-    public required decimal BaseFee { get; init; }
-    public required decimal QuoteFee { get; init; }
-    public required decimal BorrowedQuantity { get; init; }
-    public required bool IsLiquidation { get; init; }
-    public required string Side { get; init; }
-    public required string Type { get; init; }
-    public required string TimeInForce { get; init; }
-    public required string Status { get; init; }
-    public required string StatusReason { get; init; }
-    public required string StatusReasonCode { get; init; }
-    public required DateTime CreatedAtDatetime { get; init; }
-    public required string CreatedAtTimestamp { get; init; }
+    public string Handle { get; init; } = string.Empty;
+    public string OrderId { get; init; } = string.Empty;
+    public string Symbol { get; init; } = string.Empty;
+    public decimal Price { get; init; }
+    public decimal AverageFillPrice { get; init; }
+    public decimal StopPrice { get; init; }
+    public bool Margin { get; init; }
+    public decimal Quantity { get; init; }
+    public decimal QuantityFilled { get; init; }
+    public decimal BaseFee { get; init; }
+    public decimal QuoteFee { get; init; }
+    public decimal BorrowedQuantity { get; init; }
+    public bool IsLiquidation { get; init; }
+    public OrderSide Side { get; init; }
+    public OrderType Type { get; init; }
+    public OrderTimeInForce TimeInForce { get; init; }
+    public string Status { get; init; } = string.Empty;
+    public string StatusReason { get; init; } = string.Empty;
+    public string StatusReasonCode { get; init; } = string.Empty;
+    public DateTime CreatedAtDatetime { get; init; }
+    public string CreatedAtTimestamp { get; init; } = string.Empty;
 }

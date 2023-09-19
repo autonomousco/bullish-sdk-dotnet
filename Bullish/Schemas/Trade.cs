@@ -2,15 +2,15 @@ namespace Bullish.Schemas;
 
 public record Trade
 {
-    public required string TradeId { get; init; }
-    public required string OrderId { get; init; }
-    public required string Symbol { get; init; }
-    public required decimal Price { get; init; }
-    public required decimal Quantity { get; init; }
-    public required decimal BaseFee { get; init; }
-    public required decimal QuoteFee { get; init; }
-    public required string Side { get; init; }
-    public required bool IsTaker { get; init; }
-    public required DateTime CreatedAtDatetime { get; init; }
-    public required string CreatedAtTimestamp { get; init; }
+    public string TradeId { get; init; } = string.Empty;
+    public string OrderId { get; init; } = string.Empty;
+    public string Symbol { get; init; } = string.Empty;
+    public decimal Price { get; init; }
+    public decimal Quantity { get; init; }
+    public decimal BaseFee { get; init; }
+    public decimal QuoteFee { get; init; }
+    public string Side { get; init; } = string.Empty;
+    public bool IsTaker { get; init; }
+    public DateTime CreatedAtDatetime { get; init; }
+    public string CreatedAtTimestamp { get; init; } = string.Empty;
 }

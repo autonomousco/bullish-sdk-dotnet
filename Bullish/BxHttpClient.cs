@@ -137,7 +137,9 @@ public sealed class BxHttpClient
         return logoutResponse;
     }
 
-    internal async Task<BxHttpResponse<TResult>> Post<TResult, TCommand>(EndpointPath path, TCommand command) where TCommand : Command
+    internal async Task<BxHttpResponse<TResult>> Post<TResult, TCommand>(EndpointPath path, TCommand command) 
+        where TCommand : Command 
+        where TResult : notnull, new()
     {
         var url = $"{_apiServer}{path.Path}";
 
@@ -174,7 +176,7 @@ public sealed class BxHttpClient
         return await ProcessResponse<TResult>(response);
     }
 
-    internal async Task<BxHttpResponse<TResult>> Get<TResult>(EndpointPath path)
+    internal async Task<BxHttpResponse<TResult>> Get<TResult>(EndpointPath path) where TResult : notnull, new()
     {
         var url = $"{_apiServer}{path.Path}";
 
@@ -201,7 +203,7 @@ public sealed class BxHttpClient
         return await ProcessResponse<TResult>(response, path.UsePagination);
     }
 
-    private static async Task<BxHttpResponse<TResult>> ProcessResponse<TResult>(HttpResponseMessage response, bool usePagination = false)
+    private static async Task<BxHttpResponse<TResult>> ProcessResponse<TResult>(HttpResponseMessage response, bool usePagination = false) where TResult : notnull, new()
     {
         var json = await response.Content.ReadAsStringAsync();
 
@@ -256,9 +258,6 @@ public sealed class BxHttpClient
         if (!marketsResponse.IsSuccess)
             throw new Exception($"Failed to get Markets. Reason:{marketsResponse.Error.Message}");
 
-        if (marketsResponse.Result is null)
-            throw new Exception("Response did not contain a valid list of Markets.");
-
         _markets = marketsResponse.Result.ToDictionary(key => key.Symbol, value => value);
     }
 
@@ -269,9 +268,6 @@ public sealed class BxHttpClient
 
         if (!nonceResponse.IsSuccess)
             throw new Exception($"Failed to get Nonce. Reason:{nonceResponse.Error.Message}");
-
-        if (nonceResponse.Result is null)
-            throw new Exception("Response did not contain a valid Nonce.");
 
         _nonce = nonceResponse.Result;
     }

@@ -2,7 +2,7 @@ namespace Bullish.Schemas;
 
 public record Login
 {
-    public required string Authorizer { get; init; }
-    public required string OwnerAuthorizer { get; init; }
-    public required string Token { get; init; }
+    public string Authorizer { get; init; } = string.Empty;
+    public string OwnerAuthorizer { get; init; } = string.Empty;
+    public string Token { get; init; } = string.Empty;
 }

@@ -2,12 +2,12 @@ namespace Bullish.Schemas;
 
 public record Asset
 {
-    public required string AssetId { get; init; }
-    public required string Symbol { get; init; }
-    public required int Precision { get; init; }
-    public required decimal MinBalanceInterest { get; init; }
-    public required decimal MinFee { get; init; }
-    public required decimal Apr { get; init; }
-    public required decimal CollateralRating { get; init; }
-    public required decimal MaxBorrow { get; init; }
+    public string AssetId { get; init; } = string.Empty;
+    public string Symbol { get; init; } = string.Empty;
+    public int Precision { get; init; }
+    public decimal MinBalanceInterest { get; init; }
+    public decimal MinFee { get; init; }
+    public decimal Apr { get; init; }
+    public decimal CollateralRating { get; init; }
+    public decimal MaxBorrow { get; init; }
 }

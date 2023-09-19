@@ -2,13 +2,13 @@ namespace Bullish.Schemas;
 
 public record AssetAccount
 {
-    public required string TradingAccountId { get; init; }
-    public required string AssetId { get; init; }
-    public required string AssetSymbol { get; init; }
-    public required decimal AvailableQuantity { get; init; }
-    public required decimal BorrowedQuantity { get; init; }
-    public required decimal LockedQuantity { get; init; }
-    public required decimal LoanedQuantity { get; init; }
-    public required DateTime UpdatedAtDatetime { get; init; }
-    public required string UpdatedAtTimestamp { get; init; }
+    public string TradingAccountId { get; init; } = string.Empty;
+    public string AssetId { get; init; } = string.Empty;
+    public string AssetSymbol { get; init; } = string.Empty;
+    public decimal AvailableQuantity { get; init; }
+    public decimal BorrowedQuantity { get; init; }
+    public decimal LockedQuantity { get; init; }
+    public decimal LoanedQuantity { get; init; }
+    public DateTime UpdatedAtDatetime { get; init; }
+    public string UpdatedAtTimestamp { get; init; } = string.Empty;
 }

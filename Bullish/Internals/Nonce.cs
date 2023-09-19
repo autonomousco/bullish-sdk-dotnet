@@ -2,8 +2,8 @@ namespace Bullish.Internals;
 
 internal sealed record Nonce
 {
-    public required long LowerBound { get; init; }
-    public required long UpperBound { get; init; }
+    public long LowerBound { get; init; }
+    public long UpperBound { get; init; }
 
     public long Value { get; private set; } = -1;
 
