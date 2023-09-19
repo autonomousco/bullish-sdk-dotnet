@@ -27,7 +27,7 @@ public sealed class BxHttpClient
         _autoLogin = autoLogin;
 
         var emptyCredentials = string.IsNullOrWhiteSpace(publicKey) || string.IsNullOrWhiteSpace(privateKey) || string.IsNullOrWhiteSpace(metadata);
-        
+
         if (_autoLogin && emptyCredentials)
             throw new Exception("Public key, private key and metadata must be set if auto-login is enabled.");
 
@@ -119,12 +119,12 @@ public sealed class BxHttpClient
     /// <summary>
     /// Users can better manage their sessions by logging out of unused sessions. 
     /// </summary>
-    public async Task<BxHttpResponse<LogoutResponse>> Logout()
+    public async Task<BxHttpResponse<Empty>> Logout()
     {
         var bxPath = new EndpointPathBuilder(BxApiEndpoint.Logout)
             .Build();
 
-        var logoutResponse = await Get<LogoutResponse>(bxPath);
+        var logoutResponse = await Get<Empty>(bxPath);
 
         if (logoutResponse.IsSuccess)
         {
@@ -137,7 +137,7 @@ public sealed class BxHttpClient
         return logoutResponse;
     }
 
-    internal async Task<BxHttpResponse<TResult>> Post<TResult, TCommand>(EndpointPath path, TCommand command) where TCommand : Command 
+    internal async Task<BxHttpResponse<TResult>> Post<TResult, TCommand>(EndpointPath path, TCommand command) where TCommand : Command
     {
         var url = $"{_apiServer}{path.Path}";
 
@@ -205,28 +205,28 @@ public sealed class BxHttpClient
     {
         var json = await response.Content.ReadAsStringAsync();
 
-        var pageLinks = BxPageLinks.Empty;
-
-        if (usePagination)
-        {
-            var jsonNode = JsonNode.Parse(json);
-
-            json = jsonNode?["data"]?.ToJsonString();
-
-            if (string.IsNullOrWhiteSpace(json))
-                return BxHttpResponse<TResult>.Failure("Failed to get data from paginated result.");
-
-            var linksJson = jsonNode?["links"]?.ToJsonString();
-
-            if (string.IsNullOrWhiteSpace(linksJson))
-                return BxHttpResponse<TResult>.Failure("Failed to deserialize page links.");
-
-            if (Extensions.Deserialize<BxPageLinks>(linksJson) is { } links)
-                pageLinks = links;
-        }
-
         if (response.IsSuccessStatusCode)
         {
+            var pageLinks = BxPageLinks.Empty;
+
+            if (usePagination)
+            {
+                var jsonNode = JsonNode.Parse(json);
+
+                json = jsonNode?["data"]?.ToJsonString();
+
+                if (string.IsNullOrWhiteSpace(json))
+                    return BxHttpResponse<TResult>.Failure("Failed to get data from paginated result.");
+
+                var linksJson = jsonNode?["links"]?.ToJsonString();
+
+                if (string.IsNullOrWhiteSpace(linksJson))
+                    return BxHttpResponse<TResult>.Failure("Failed to deserialize page links.");
+
+                if (Extensions.Deserialize<BxPageLinks>(linksJson) is { } links)
+                    pageLinks = links;
+            }
+
             // If there's no json payload in the response (i.e. logout), just return success
             if (string.IsNullOrWhiteSpace(json))
                 return BxHttpResponse<TResult>.Success();
@@ -236,6 +236,7 @@ public sealed class BxHttpClient
             return obj is not null ? BxHttpResponse<TResult>.Success(obj, pageLinks) : BxHttpResponse<TResult>.Failure("Could not deserialize response.");
         }
 
+        // The response did not return a success StatusCode, try to parse the error
         try
         {
             var bxHttpError = Extensions.Deserialize<BxHttpError>(json) ?? BxHttpError.Error("Unknown error");

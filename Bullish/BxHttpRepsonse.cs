@@ -15,14 +15,6 @@ public sealed record BxHttpResponse<T>
         PageLinks = pageLinks,
     };
     
-    public static BxHttpResponse<T> Success(T result) => new()
-    {
-        Result = result,
-        IsSuccess = true,
-        Error = new BxHttpError(),
-        PageLinks = BxPageLinks.Empty,
-    };
-    
     public static BxHttpResponse<T> Success() => new()
     {
         Result = default,

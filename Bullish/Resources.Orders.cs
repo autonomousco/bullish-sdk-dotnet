@@ -42,7 +42,7 @@ public static partial class Resources
         return await httpClient.Get<Order>(bxPath);
     }
 
-    public static async Task<BxHttpResponse<CreateOrderResponse>> CreateOrder(this BxHttpClient httpClient, string symbol, OrderType type, OrderSide side, decimal quantity, decimal price = 0M, decimal stopPrice = 0M, OrderTimeInForce timeInForce = OrderTimeInForce.None, string handle = "", bool allowMargin = false, bool isTest = false)
+    public static async Task<BxHttpResponse<CreateOrder>> CreateOrder(this BxHttpClient httpClient, string symbol, OrderType type, OrderSide side, decimal quantity, decimal price = 0M, decimal stopPrice = 0M, OrderTimeInForce timeInForce = OrderTimeInForce.None, string handle = "", bool allowMargin = false, bool isTest = false)
     {
         // Do some validation
         var priceNormalized = await httpClient.FormatValue(PrecisionType.QuotePrecision, symbol, price);
@@ -63,26 +63,26 @@ public static partial class Resources
             TimeInForce: timeInForce == OrderTimeInForce.None ? null : timeInForce.ToString().ToUpperInvariant(),
             AllowMargin: allowMargin);
 
-        return await httpClient.Post<CreateOrderResponse, CreateOrderCommand>(bxPath,command);
+        return await httpClient.Post<CreateOrder, CreateOrderCommand>(bxPath,command);
     }
 
-    public static async Task<BxHttpResponse<CancelAllOrdersResponse>> CancelAllOpenOrders(this BxHttpClient httpClient, string tradingAccountId)
+    public static async Task<BxHttpResponse<CancelAllOrders>> CancelAllOpenOrders(this BxHttpClient httpClient, string tradingAccountId)
     {
         var bxPath = new EndpointPathBuilder(BxApiEndpoint.CommandCancelAllOpenOrders)
             .Build();
 
         var command = new CancelAllOrdersCommand(tradingAccountId);
 
-        return await httpClient.Post<CancelAllOrdersResponse, CancelAllOrdersCommand>(bxPath, command);
+        return await httpClient.Post<CancelAllOrders, CancelAllOrdersCommand>(bxPath, command);
     }
 
-    public static async Task<BxHttpResponse<CancelAllOrdersResponse>> CancelAllOpenOrdersByMarket(this BxHttpClient httpClient, string tradingAccountId, string symbol)
+    public static async Task<BxHttpResponse<CancelAllOrders>> CancelAllOpenOrdersByMarket(this BxHttpClient httpClient, string tradingAccountId, string symbol)
     {
         var bxPath = new EndpointPathBuilder(BxApiEndpoint.CommandCancelAllOpenOrders)
             .Build();
 
         var command = new CancelAllOrdersByMarketCommand(symbol, tradingAccountId);
 
-        return await httpClient.Post<CancelAllOrdersResponse, CancelAllOrdersByMarketCommand>(bxPath, command);
+        return await httpClient.Post<CancelAllOrders, CancelAllOrdersByMarketCommand>(bxPath, command);
     }
 }
