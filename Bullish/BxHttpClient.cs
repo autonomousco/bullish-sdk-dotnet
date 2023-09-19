@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using System.Text.Json.Nodes;
 using Bullish.Internals;
+using Bullish.Schemas;
 using Bullish.Signer;
 
 namespace Bullish;
@@ -20,7 +21,7 @@ public sealed class BxHttpClient
 
     private Dictionary<string, Market> _markets = new();
 
-    public BxHttpClient(string publicKey = "", string privateKey = "", string metadata = "", BxApiServer apiServer = BxApiServer.Production, bool autoLogin = true)
+    public BxHttpClient(string publicKey = "", string privateKey = "", string metadata = "", BxApiServer apiServer = BxApiServer.Production, bool autoLogin = false)
     {
         _apiServer = Constants.BxApiServers[apiServer];
         _autoLogin = autoLogin;
@@ -67,28 +68,25 @@ public sealed class BxHttpClient
     /// In order to free up unused sessions, users must logout.
     /// </summary>
     /// <param name="storeResult">Store the resulting JWT and Nonce in the BxHttpClient instance?</param>
-    public async Task<BxHttpResponse<LoginResponse>> Login(bool storeResult = true)
+    public async Task<BxHttpResponse<Login>> Login(bool storeResult = true)
     {
         await UpdateNonce();
 
-        var utcNow = DateTimeOffset.UtcNow;
-        var nonce = utcNow.ToUnixTimeSeconds();
-        var expirationTime = nonce + 300;
-
-        var loginPayload = new LoginPayload
+        var nonce = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        var loginPayload = new
         {
             UserId = _metadata.UserId,
             Nonce = nonce,
-            ExpirationTime = expirationTime,
+            ExpirationTime = nonce + 300,
             BiometricsUsed = false,
-            SessionKey = null,
+            SessionKey = (string?)null,
         };
 
         var payloadJson = Extensions.Serialize(loginPayload);
 
         var signature = RequestSigner.Sign(_privateKey, _publicKey, payloadJson);
 
-        var login = new Login
+        var login = new
         {
             PublicKey = _publicKey,
             LoginPayload = loginPayload,
@@ -106,7 +104,7 @@ public sealed class BxHttpClient
 
         var response = await httpClient.PostAsync(url, new StringContent(bodyJson, new MediaTypeHeaderValue("application/json")));
 
-        var loginResponse = await ProcessResponse<LoginResponse>(response);
+        var loginResponse = await ProcessResponse<Login>(response);
 
         if (loginResponse.IsSuccess && storeResult)
         {

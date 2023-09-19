@@ -1,4 +1,5 @@
 using Bullish.Internals;
+using Bullish.Schemas;
 
 namespace Bullish;
 
