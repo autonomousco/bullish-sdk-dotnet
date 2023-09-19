@@ -1,3 +1,5 @@
+using Bullish.Internals;
+
 namespace Bullish;
 
 public static partial class Resources
@@ -8,12 +10,12 @@ public static partial class Resources
     /// <param name="symbol">Symbol to get</param>
     /// <param name="pageSize">The number of candles to return 5, 25, 50, 100, default value is 25</param>
     /// <param name="pageLink">Get the results for the next or previous page</param>
-    public static async Task<BxHttpResponse<List<MarketTrade>>> GetMarketTrades(this BxHttpClient httpClient, string symbol, int pageSize = 25, BxPageLink? pageLink = null)
+    public static async Task<BxHttpResponse<List<MarketTrade>>> GetMarketTrades(this BxHttpClient httpClient, string symbol, int pageSize = 25, BxPageLinks.PageLink? pageLink = null)
     {
-        var bxPath = new BxPathBuilder(BxApiEndpoint.HistoryMarketsSymbolTrades)
+        var bxPath = new EndpointPathBuilder(BxApiEndpoint.HistoryMarketsSymbolTrades)
             .AddResourceId(symbol)
             .AddPagination(pageSize, useMetaData: true)
-            .AddPageLink(pageLink ?? BxPageLink.Empty)
+            .AddPageLink(pageLink ?? BxPageLinks.PageLink.Empty)
             .Build();
         
         return await httpClient.Get<List<MarketTrade>>(bxPath);
@@ -26,11 +28,11 @@ public static partial class Resources
     /// </summary>
     /// <param name="pageSize">The number of candles to return 5, 25, 50, 100, default value is 25</param>
     /// <param name="pageLink">Get the results for the next or previous page</param>
-    public static async Task<BxHttpResponse<List<BorrowInterest>>> GetHourlyBorrowInterest(this BxHttpClient httpClient, int pageSize = 25, BxPageLink? pageLink = null)
+    public static async Task<BxHttpResponse<List<BorrowInterest>>> GetHourlyBorrowInterest(this BxHttpClient httpClient, int pageSize = 25, BxPageLinks.PageLink? pageLink = null)
     {
-        var bxPath = new BxPathBuilder(BxApiEndpoint.HistoryBorrowInterest)
+        var bxPath = new EndpointPathBuilder(BxApiEndpoint.HistoryBorrowInterest)
             .AddPagination(pageSize, useMetaData: true)
-            .AddPageLink(pageLink ?? BxPageLink.Empty)
+            .AddPageLink(pageLink ?? BxPageLinks.PageLink.Empty)
             .Build();
         
         return await httpClient.Get<List<BorrowInterest>>(bxPath);

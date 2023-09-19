@@ -1,13 +1,13 @@
-namespace Bullish;
+namespace Bullish.Internals;
 
-internal sealed record BxNonce
+internal sealed record Nonce
 {
     public required long LowerBound { get; init; }
     public required long UpperBound { get; init; }
 
     public long Value { get; private set; } = -1;
 
-    public static BxNonce Empty => new()
+    public static Nonce Empty => new()
     {
         UpperBound = 0,
         LowerBound = 0,

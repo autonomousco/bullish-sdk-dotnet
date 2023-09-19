@@ -1,27 +1,23 @@
-namespace Bullish;
+namespace Bullish.Internals;
 
-internal sealed class BxPathBuilder
+internal sealed class EndpointPathBuilder
 {
-    private readonly BxApiEndpoint _endpoint;
-
-    private readonly BxEndpoint _bxEndpoint;
+    private readonly Endpoint _endpoint;
     
     private readonly List<string> _components = new();
 
     private bool _usePagination = false;
 
-    public BxPathBuilder(BxApiEndpoint endpoint)
+    public EndpointPathBuilder(BxApiEndpoint endpoint)
     {
-        _endpoint = endpoint;
+        _endpoint = Constants.BxApiEndpoints[endpoint];
        
-        _bxEndpoint = Constants.BxApiEndpoints[endpoint];
-       
-        _components.Add(_bxEndpoint.Version);
+        _components.Add(_endpoint.Version);
         
-        _components.Add(_bxEndpoint.Path);
+        _components.Add(_endpoint.Path);
     }
 
-    public BxPathBuilder AddResourceId(string resourceId)
+    public EndpointPathBuilder AddResourceId(string resourceId)
     {
         var components = _components[1].Split('{', '}');
         components[1] = resourceId;
@@ -31,19 +27,19 @@ internal sealed class BxPathBuilder
         return this;
     }
 
-    public BxPath Build()
+    public EndpointPath Build()
     {
-        return new BxPath(_endpoint, string.Concat(_components), _bxEndpoint.UseAuth, _usePagination);
+        return new EndpointPath(string.Concat(_components), _endpoint.UseAuth, _usePagination);
     }
 
-    public BxPathBuilder AddPageLink(BxPageLink pageLink)
+    public EndpointPathBuilder AddPageLink(BxPageLinks.PageLink pageLink)
     {
         AddQueryParam(pageLink.Name, pageLink.Value);
 
         return this;
     }
 
-    public BxPathBuilder AddPagination(int pageSize, bool useMetaData)
+    public EndpointPathBuilder AddPagination(int pageSize, bool useMetaData)
     {
         AddQueryParam("_pageSize", pageSize.ToString());
         AddQueryParam("_metaData", useMetaData);
@@ -53,7 +49,7 @@ internal sealed class BxPathBuilder
         return this;
     }
 
-    public BxPathBuilder AddQueryParam<T>(string name, T value)
+    public EndpointPathBuilder AddQueryParam<T>(string name, T value)
     {
         if (value is null)
             throw new Exception($"Value for {name} cannot be null.");
@@ -74,7 +70,7 @@ internal sealed class BxPathBuilder
         return AddQueryParam(name, value2);;
     }
 
-    public BxPathBuilder AddQueryParam(string name, string value)
+    public EndpointPathBuilder AddQueryParam(string name, string value)
     {
         if (string.IsNullOrWhiteSpace(value))
             return this;
@@ -86,7 +82,7 @@ internal sealed class BxPathBuilder
         return this;
     }
 
-    public BxPathBuilder AddQueryParam(BxDateTime timestamp)
+    public EndpointPathBuilder AddQueryParam(DateTimeFilter timestamp)
     {
         var (name, value) = timestamp.AsQueryParam();
         return AddQueryParam(name, value);

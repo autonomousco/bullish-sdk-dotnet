@@ -1,4 +1,5 @@
 using System.Globalization;
+using Bullish.Internals;
 
 namespace Bullish;
 
@@ -13,15 +14,15 @@ public static partial class Resources
     /// <param name="orderStatus">Order status</param>
     /// <param name="pageSize">The number of candles to return 5, 25, 50, 100, default value is 25</param>
     /// <param name="pageLink">Get the results for the next or previous page</param>
-    public static async Task<BxHttpResponse<List<Order>>> GetOrders(this BxHttpClient httpClient, string symbol = "", string handle = "", OrderSide orderSide = OrderSide.None, OrderStatus orderStatus = OrderStatus.None, int pageSize = 25, BxPageLink? pageLink = null)
+    public static async Task<BxHttpResponse<List<Order>>> GetOrders(this BxHttpClient httpClient, string symbol = "", string handle = "", OrderSide orderSide = OrderSide.None, OrderStatus orderStatus = OrderStatus.None, int pageSize = 25, BxPageLinks.PageLink? pageLink = null)
     {
-        var bxPath = new BxPathBuilder(BxApiEndpoint.Orders)
+        var bxPath = new EndpointPathBuilder(BxApiEndpoint.Orders)
             .AddQueryParam("symbol", symbol)
             .AddQueryParam("handle", handle)
             .AddQueryParam("side", orderSide)
             .AddQueryParam("status", orderStatus)
             .AddPagination(pageSize, useMetaData: true)
-            .AddPageLink(pageLink ?? BxPageLink.Empty)
+            .AddPageLink(pageLink ?? BxPageLinks.PageLink.Empty)
             .Build();
 
         return await httpClient.Get<List<Order>>(bxPath);
@@ -33,7 +34,7 @@ public static partial class Resources
     /// <param name="orderId">The order ID</param>
     public static async Task<BxHttpResponse<Order>> GetOrder(this BxHttpClient httpClient, string orderId)
     {
-        var bxPath = new BxPathBuilder(BxApiEndpoint.OrdersOrderId)
+        var bxPath = new EndpointPathBuilder(BxApiEndpoint.OrdersOrderId)
             .AddResourceId(orderId)
             .Build();
 
@@ -47,75 +48,40 @@ public static partial class Resources
         var stopPriceNormalized = await httpClient.FormatValue(PrecisionType.QuotePrecision, symbol, stopPrice);
         var quantityNormalized = await httpClient.FormatValue(PrecisionType.BasePrecision, symbol, quantity);
 
-        var bxPath = new BxPathBuilder(BxApiEndpoint.Orders)
+        var bxPath = new EndpointPathBuilder(BxApiEndpoint.Orders)
             .AddQueryParam("test", isTest)
             .Build();
 
-        // TODO: this will not work. Nonce has not yet been configured via auto-login
-        var commandRequest = httpClient.GetCommandRequest();
+        var command = new CreateOrderCommand(
+            Handle: string.IsNullOrWhiteSpace(handle) ? null : handle,
+            Symbol: symbol,
+            Type: type.ToString().ToUpperInvariant(), Side: side.ToString().ToUpperInvariant(),
+            Price: price == 0 ? null : priceNormalized.ToString(CultureInfo.InvariantCulture),
+            StopPrice: stopPrice == 0 ? null : stopPriceNormalized.ToString(CultureInfo.InvariantCulture),
+            Quantity: quantityNormalized.ToString(CultureInfo.InvariantCulture),
+            TimeInForce: timeInForce == OrderTimeInForce.None ? null : timeInForce.ToString().ToUpperInvariant(),
+            AllowMargin: allowMargin);
 
-        var request = new CreateOrderRequest
-        {
-            Timestamp = commandRequest.Timestamp,
-            Nonce = commandRequest.Nonce,
-            Authorizer = commandRequest.Authorizer,
-            Command = new CreateOrderCommand
-            {
-                Handle = string.IsNullOrWhiteSpace(handle) ? null : handle,
-                Symbol = symbol,
-                Type = type.ToString().ToUpperInvariant(),
-                Side = side.ToString().ToUpperInvariant(),
-                Price = price == 0 ? null : priceNormalized.ToString(CultureInfo.InvariantCulture),
-                StopPrice = stopPrice == 0 ? null : stopPriceNormalized.ToString(CultureInfo.InvariantCulture),
-                Quantity = quantityNormalized.ToString(CultureInfo.InvariantCulture),
-                TimeInForce = timeInForce == OrderTimeInForce.None ? null : timeInForce.ToString().ToUpperInvariant(),
-                AllowMargin = allowMargin,
-            }
-        };
-
-        return await httpClient.Post<CreateOrderResponse, CreateOrderRequest>(bxPath, request);
+        return await httpClient.Post<CreateOrderResponse, CreateOrderCommand>(bxPath,command);
     }
 
     public static async Task<BxHttpResponse<CancelAllOrdersResponse>> CancelAllOpenOrders(this BxHttpClient httpClient, string tradingAccountId)
     {
-        var bxPath = new BxPathBuilder(BxApiEndpoint.CommandCancelAllOpenOrders)
+        var bxPath = new EndpointPathBuilder(BxApiEndpoint.CommandCancelAllOpenOrders)
             .Build();
 
-        var commandRequest = httpClient.GetCommandRequest();
+        var command = new CancelAllOrdersCommand(tradingAccountId);
 
-        var request = new CancelAllOrdersRequest
-        {
-            Timestamp = commandRequest.Timestamp,
-            Nonce = commandRequest.Nonce,
-            Authorizer = commandRequest.Authorizer,
-            Command = new CancelAllOrdersCommand
-            {
-                TradingAccountId = tradingAccountId,
-            }
-        };
-
-        return await httpClient.Post<CancelAllOrdersResponse, CancelAllOrdersRequest>(bxPath, request);
+        return await httpClient.Post<CancelAllOrdersResponse, CancelAllOrdersCommand>(bxPath, command);
     }
 
     public static async Task<BxHttpResponse<CancelAllOrdersResponse>> CancelAllOpenOrdersByMarket(this BxHttpClient httpClient, string tradingAccountId, string symbol)
     {
-        var bxPath = new BxPathBuilder(BxApiEndpoint.CommandCancelAllOpenOrders)
+        var bxPath = new EndpointPathBuilder(BxApiEndpoint.CommandCancelAllOpenOrders)
             .Build();
 
-        var commandRequest = httpClient.GetCommandRequest();
+        var command = new CancelAllOrdersByMarketCommand(symbol, tradingAccountId);
 
-        var request = new CancelAllOrdersByMarketRequest
-        {
-            Timestamp = commandRequest.Timestamp,
-            Nonce = commandRequest.Nonce,
-            Authorizer = commandRequest.Authorizer,
-            Command = new CancelAllOrdersCommandByMarket
-            {
-                Symbol = symbol,
-                TradingAccountId = tradingAccountId,
-            }
-        };
-
-        return await httpClient.Post<CancelAllOrdersResponse, CancelAllOrdersByMarketRequest>(bxPath, request);
+        return await httpClient.Post<CancelAllOrdersResponse, CancelAllOrdersByMarketCommand>(bxPath, command);
     }
 }

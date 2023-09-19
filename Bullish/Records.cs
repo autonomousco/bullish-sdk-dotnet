@@ -2,34 +2,6 @@ using System.Text.Json.Serialization;
 
 namespace Bullish;
 
-public interface ICommandRequest
-{
-    public string Timestamp { get; }
-    public string Nonce { get; }
-    public string Authorizer { get; }
-}
-
-public record CommandRequest : ICommandRequest
-{
-    public required string Timestamp { get; init; }
-    public required string Nonce { get; init; }
-    public required string Authorizer { get; init; }
-}
-
-public record CancelAllOrdersCommand
-{
-    public string CommandType => "V1CancelAllOrders";
-    public required string TradingAccountId { get; init; }
-}
-
-public record CancelAllOrdersRequest : ICommandRequest
-{
-    public required string Timestamp { get; init; }
-    public required string Nonce { get; init; }
-    public required string Authorizer { get; init; }
-    public required CancelAllOrdersCommand Command { get; init; }
-}
-
 public record CancelAllOrdersResponse
 {
     public required string Message { get; init; }
@@ -39,43 +11,6 @@ public record CancelAllOrdersResponse
     // public required object OrderId { get; init; }
     // public required object Handle { get; init; }
     // public required bool Test { get; init; }
-}
-
-public record CancelAllOrdersByMarketRequest : ICommandRequest
-{
-    public required string Timestamp { get; init; }
-    public required string Nonce { get; init; }
-    public required string Authorizer { get; init; }
-    public required CancelAllOrdersCommandByMarket Command { get; init; }
-}
-
-public record CancelAllOrdersCommandByMarket
-{
-    public string CommandType => "V1CancelAllOrdersByMarket";
-    public required string Symbol { get; init; }
-    public required string TradingAccountId { get; init; }
-}
-
-public record CreateOrderRequest : ICommandRequest
-{
-    public required string Timestamp { get; init; }
-    public required string Nonce { get; init; }
-    public required string Authorizer { get; init; }
-    public required CreateOrderCommand Command { get; init; }
-}
-
-public record CreateOrderCommand
-{
-    public string CommandType => "V1CreateOrder";
-    public required string? Handle { get; init; }
-    public required string Symbol { get; init; }
-    public required string Type { get; init; }
-    public required string Side { get; init; }
-    public required string? Price { get; init; }
-    public required string? StopPrice { get; init; }
-    public required string Quantity { get; init; }
-    public required string? TimeInForce { get; init; }
-    public required bool AllowMargin { get; init; }
 }
 
 public record CreateOrderResponse
@@ -424,11 +359,10 @@ public record AmmInstruction
     public required int StatusReasonCode { get; init; }
     public required DateTime CreatedAtDatetime { get; init; }
     public required string CreatedAtTimestamp { get; init; }
-
-    [JsonPropertyName("24HrApy")] public required string TwentyFourHrApy { get; init; }
-
-    [JsonPropertyName("24HrYieldEarn")] public required string TwentyFourHrYieldEarn { get; init; }
-
+    [JsonPropertyName("24HrApy")] 
+    public required string TwentyFourHrApy { get; init; }
+    [JsonPropertyName("24HrYieldEarn")] 
+    public required string TwentyFourHrYieldEarn { get; init; }
     public required string Apy { get; init; }
     public required string BaseCurrentQuantity { get; init; }
     public required string BaseInvestQuantity { get; init; }

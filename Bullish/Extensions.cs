@@ -8,8 +8,8 @@ internal static class Extensions
 {
     public static int GetDecimalPlaces(this decimal n)
     {
-        n = Math.Abs(n); //make sure it is positive.
-        n -= (int)n; //remove the integer part of the number.
+        n = Math.Abs(n); // Make sure it's positive
+        n -= (int)n; // Remove the integer part
             
         var decimalPlaces = 0;
             

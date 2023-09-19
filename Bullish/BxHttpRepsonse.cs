@@ -11,7 +11,7 @@ public sealed record BxHttpResponse<T>
     {
         Result = result,
         IsSuccess = true,
-        Error = BxHttpError.Empty,
+        Error = new BxHttpError(),
         PageLinks = pageLinks,
     };
     
@@ -19,7 +19,7 @@ public sealed record BxHttpResponse<T>
     {
         Result = result,
         IsSuccess = true,
-        Error = BxHttpError.Empty,
+        Error = new BxHttpError(),
         PageLinks = BxPageLinks.Empty,
     };
     
@@ -27,7 +27,7 @@ public sealed record BxHttpResponse<T>
     {
         Result = default,
         IsSuccess = true,
-        Error = BxHttpError.Empty,       
+        Error = new BxHttpError(),       
         PageLinks = BxPageLinks.Empty,
     };
 

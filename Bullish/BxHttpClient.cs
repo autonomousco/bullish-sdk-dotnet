@@ -1,46 +1,41 @@
 using System.Net.Http.Headers;
 using System.Text.Json.Nodes;
+using Bullish.Internals;
 using Bullish.Signer;
 
 namespace Bullish;
 
 public sealed class BxHttpClient
 {
+    private readonly bool _autoLogin;
+    private readonly string _apiServer;
+
     private string _publicKey = string.Empty;
-    private string _privateKey= string.Empty;
-    private BxMetadata _bxMetadata = BxMetadata.Empty;
-    private readonly bool _autoLogin = false;
+    private string _privateKey = string.Empty;
+    private Metadata _metadata = Metadata.Empty;
 
-    private string _apiServer = Constants.BxApiServers[BxApiServer.Production];
-
-    private BxNonce _bxNonce = BxNonce.Empty;
-    private BxAuthToken _bxAuthToken = BxAuthToken.Empty;
+    private Nonce _nonce = Nonce.Empty;
+    private AuthToken _authToken = AuthToken.Empty;
     private string _authorizer = string.Empty;
+
     private Dictionary<string, Market> _markets = new();
 
-    // TODO: This needs to be refactored into a CommandBuilder pattern
-    public CommandRequest GetCommandRequest() => new()
-    {
-        Timestamp = DateTime.UtcNow.ToUnixTimeMilliseconds().ToString(),
-        Nonce = $"{_bxNonce.NextValue()}",
-        Authorizer = _authorizer,
-    };
-
-    public BxHttpClient ConfigureAuth(string publicKey, string privateKey, string metadata)
-    {
-        _privateKey = privateKey;
-        _publicKey = publicKey;
-
-        _bxMetadata = Extensions.DeserializeBase64<BxMetadata>(metadata) ?? throw new ArgumentException("Invalid metadata");
-
-        return this;
-    }
-    
-    public BxHttpClient ConfigureApi(BxApiServer apiServer)
+    public BxHttpClient(string publicKey = "", string privateKey = "", string metadata = "", BxApiServer apiServer = BxApiServer.Production, bool autoLogin = true)
     {
         _apiServer = Constants.BxApiServers[apiServer];
+        _autoLogin = autoLogin;
+
+        var emptyCredentials = string.IsNullOrWhiteSpace(publicKey) || string.IsNullOrWhiteSpace(privateKey) || string.IsNullOrWhiteSpace(metadata);
         
-        return this;
+        if (_autoLogin && emptyCredentials)
+            throw new Exception("Public key, private key and metadata must be set if auto-login is enabled.");
+
+        if (!emptyCredentials)
+        {
+            _privateKey = privateKey;
+            _publicKey = publicKey;
+            _metadata = Extensions.DeserializeBase64<Metadata>(metadata) ?? throw new ArgumentException("Invalid metadata");
+        }
     }
 
     internal async Task<decimal> FormatValue(PrecisionType type, string symbol, decimal value)
@@ -82,7 +77,7 @@ public sealed class BxHttpClient
 
         var loginPayload = new LoginPayload
         {
-            UserId = _bxMetadata.UserId,
+            UserId = _metadata.UserId,
             Nonce = nonce,
             ExpirationTime = expirationTime,
             BiometricsUsed = false,
@@ -100,7 +95,7 @@ public sealed class BxHttpClient
             Signature = signature,
         };
 
-        var bxPath = new BxPathBuilder(BxApiEndpoint.Login)
+        var bxPath = new EndpointPathBuilder(BxApiEndpoint.Login)
             .Build();
 
         var url = $"{_apiServer}{bxPath.Path}";
@@ -115,7 +110,7 @@ public sealed class BxHttpClient
 
         if (loginResponse.IsSuccess && storeResult)
         {
-            _bxAuthToken = new BxAuthToken(loginResponse.Result!.Token);
+            _authToken = new AuthToken(loginResponse.Result!.Token);
             _authorizer = loginResponse.Result.Authorizer;
             // _ownerAuthorizer = loginResponse.Result.OwnerAuthorizer;
         }
@@ -128,15 +123,15 @@ public sealed class BxHttpClient
     /// </summary>
     public async Task<BxHttpResponse<LogoutResponse>> Logout()
     {
-        var bxPath = new BxPathBuilder(BxApiEndpoint.Logout)
+        var bxPath = new EndpointPathBuilder(BxApiEndpoint.Logout)
             .Build();
 
         var logoutResponse = await Get<LogoutResponse>(bxPath);
 
         if (logoutResponse.IsSuccess)
         {
-            _bxNonce = BxNonce.Empty;
-            _bxAuthToken = BxAuthToken.Empty;
+            _nonce = Nonce.Empty;
+            _authToken = AuthToken.Empty;
             _authorizer = string.Empty;
             // _ownerAuthorizer = string.Empty;
         }
@@ -144,16 +139,13 @@ public sealed class BxHttpClient
         return logoutResponse;
     }
 
-    internal async Task<BxHttpResponse<TResult>> Post<TResult, TPayload>(BxPath path, TPayload payload)
+    internal async Task<BxHttpResponse<TResult>> Post<TResult, TCommand>(EndpointPath path, TCommand command) where TCommand : Command 
     {
         var url = $"{_apiServer}{path.Path}";
 
         var httpClient = new HttpClient();
 
-        if (payload is not ICommandRequest commandRequest)
-            throw new Exception("Validated POST requests must use a CommandRequest object,");
-
-        if (!_bxAuthToken.IsValid)
+        if (!_authToken.IsValid)
         {
             if (_autoLogin)
                 await Login();
@@ -161,14 +153,22 @@ public sealed class BxHttpClient
                 throw new Exception("No valid JWT was found. Please login.");
         }
 
-        var bodyJson = Extensions.Serialize(payload);
+        // Authorize the command with data available only after login
+        command = command with
+        {
+            Timestamp = $"{DateTime.UtcNow.ToUnixTimeMilliseconds()}",
+            Nonce = $"{_nonce.NextValue()}",
+            Authorizer = _authorizer,
+        };
+
+        var bodyJson = Extensions.Serialize(command);
 
         var signature = RequestSigner.Sign(_privateKey, _publicKey, bodyJson);
 
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _bxAuthToken.Jwt);
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _authToken.Jwt);
         httpClient.DefaultRequestHeaders.Add("BX-SIGNATURE", signature);
-        httpClient.DefaultRequestHeaders.Add("BX-TIMESTAMP", commandRequest.Timestamp);
-        httpClient.DefaultRequestHeaders.Add("BX-NONCE", commandRequest.Nonce);
+        httpClient.DefaultRequestHeaders.Add("BX-TIMESTAMP", command.Timestamp);
+        httpClient.DefaultRequestHeaders.Add("BX-NONCE", command.Nonce);
         httpClient.DefaultRequestHeaders.Add("BX-NONCE-WINDOW-ENABLED", "false");
 
         var response = await httpClient.PostAsync(url, new StringContent(bodyJson, new MediaTypeHeaderValue("application/json")));
@@ -176,7 +176,7 @@ public sealed class BxHttpClient
         return await ProcessResponse<TResult>(response);
     }
 
-    internal async Task<BxHttpResponse<TResult>> Get<TResult>(BxPath path)
+    internal async Task<BxHttpResponse<TResult>> Get<TResult>(EndpointPath path)
     {
         var url = $"{_apiServer}{path.Path}";
 
@@ -184,7 +184,7 @@ public sealed class BxHttpClient
 
         if (path.UseAuth)
         {
-            if (!_bxAuthToken.IsValid)
+            if (!_authToken.IsValid)
             {
                 if (_autoLogin)
                     await Login();
@@ -192,10 +192,10 @@ public sealed class BxHttpClient
                     throw new Exception("No valid JWT was found. Please login.");
             }
 
-            if (!_bxNonce.IsValid())
+            if (!_nonce.IsValid())
                 throw new Exception("No valid Nonce was found. Please login.");
 
-            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _bxAuthToken.Jwt);
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _authToken.Jwt);
         }
 
         var response = await httpClient.GetAsync(url);
@@ -274,6 +274,6 @@ public sealed class BxHttpClient
         if (nonceResponse.Result is null)
             throw new Exception("Response did not contain a valid Nonce.");
 
-        _bxNonce = nonceResponse.Result;
+        _nonce = nonceResponse.Result;
     }
 }

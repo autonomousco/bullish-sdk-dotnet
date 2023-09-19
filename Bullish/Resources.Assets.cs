@@ -1,3 +1,5 @@
+using Bullish.Internals;
+
 namespace Bullish;
 
 public static partial class Resources
@@ -7,7 +9,7 @@ public static partial class Resources
     /// </summary>
     public static async Task<BxHttpResponse<List<Asset>>> GetAssets(this BxHttpClient httpClient)
     {
-        var bxPath = new BxPathBuilder(BxApiEndpoint.Assets)
+        var bxPath = new EndpointPathBuilder(BxApiEndpoint.Assets)
             .Build();
         
         return await httpClient.Get<List<Asset>>(bxPath);
@@ -19,7 +21,7 @@ public static partial class Resources
     /// <param name="symbol">For example "BTC"</param>
     public static async Task<BxHttpResponse<Asset>> GetAsset(this BxHttpClient httpClient, string symbol)
     {
-        var bxPath = new BxPathBuilder(BxApiEndpoint.AssetsSymbol)
+        var bxPath = new EndpointPathBuilder(BxApiEndpoint.AssetsSymbol)
             .AddResourceId(symbol)
             .Build();
         

@@ -1,3 +1,5 @@
+using Bullish.Internals;
+
 namespace Bullish;
 
 public static partial class Resources
@@ -7,7 +9,7 @@ public static partial class Resources
     /// </summary>
     public static async Task<BxHttpResponse<List<Market>>> GetMarkets(this BxHttpClient httpClient)
     {
-        var bxPath = new BxPathBuilder(BxApiEndpoint.Markets)
+        var bxPath = new EndpointPathBuilder(BxApiEndpoint.Markets)
             .Build();
         
         return await httpClient.Get<List<Market>>(bxPath);
@@ -19,7 +21,7 @@ public static partial class Resources
     /// <param name="symbol">Symbol to get</param>
     public static async Task<BxHttpResponse<Market>> GetMarket(this BxHttpClient httpClient, string symbol)
     {
-        var bxPath = new BxPathBuilder(BxApiEndpoint.MarketsSymbol)
+        var bxPath = new EndpointPathBuilder(BxApiEndpoint.MarketsSymbol)
             .AddResourceId(symbol)
             .Build();
         
@@ -33,7 +35,7 @@ public static partial class Resources
     /// <param name="depth">Controls the number of bids/asks returned from the mid price</param>
     public static async Task<BxHttpResponse<OrderBook>> GetMarketOrderBook(this BxHttpClient httpClient, string symbol, int depth = 10)
     {
-        var bxPath = new BxPathBuilder(BxApiEndpoint.MarketsSymbolOrderBookHybrid)
+        var bxPath = new EndpointPathBuilder(BxApiEndpoint.MarketsSymbolOrderBookHybrid)
                 .AddResourceId(symbol)
                 .AddQueryParam("depth", depth)
                 .Build();
@@ -48,7 +50,7 @@ public static partial class Resources
     /// <param name="symbol">Symbol to get</param>
     public static async Task<BxHttpResponse<List<MarketTrade>>> GetMarketTrades(this BxHttpClient httpClient, string symbol)
     {
-        var bxPath = new BxPathBuilder(BxApiEndpoint.MarketsSymbolTrades)
+        var bxPath = new EndpointPathBuilder(BxApiEndpoint.MarketsSymbolTrades)
             .AddResourceId(symbol)
             .Build();
         
@@ -62,7 +64,7 @@ public static partial class Resources
     /// <param name="symbol">Symbol to get</param>
     public static async Task<BxHttpResponse<Tick>> GetMarketTick(this BxHttpClient httpClient, string symbol)
     {
-        var bxPath = new BxPathBuilder(BxApiEndpoint.MarketsSymbolTick)
+        var bxPath = new EndpointPathBuilder(BxApiEndpoint.MarketsSymbolTick)
             .AddResourceId(symbol)
             .Build();
         
@@ -78,15 +80,15 @@ public static partial class Resources
     /// <param name="toTimestamp">End timestamp of window</param>
     /// <param name="pageSize">The number of candles to return 5, 25, 50, 100, default value is 25</param>
     /// <param name="pageLink">Get the results for the next or previous page</param>
-    public static async Task<BxHttpResponse<List<MarketCandle>>> GetMarketCandles(this BxHttpClient httpClient, string symbol, TimeBucket timeBucket, DateTime fromTimestamp, DateTime toTimestamp, int pageSize = 25, BxPageLink? pageLink = null)
+    public static async Task<BxHttpResponse<List<MarketCandle>>> GetMarketCandles(this BxHttpClient httpClient, string symbol, TimeBucket timeBucket, DateTime fromTimestamp, DateTime toTimestamp, int pageSize = 25, BxPageLinks.PageLink? pageLink = null)
     {
-        var bxPath = new BxPathBuilder(BxApiEndpoint.MarketsSymbolCandle)
+        var bxPath = new EndpointPathBuilder(BxApiEndpoint.MarketsSymbolCandle)
             .AddResourceId(symbol)
-            .AddQueryParam(BxDateTime.GreaterThanOrEqual(fromTimestamp))
-            .AddQueryParam(BxDateTime.LessThanOrEqual(toTimestamp))
+            .AddQueryParam(DateTimeFilter.GreaterThanOrEqual(fromTimestamp))
+            .AddQueryParam(DateTimeFilter.LessThanOrEqual(toTimestamp))
             .AddQueryParam("timeBucket", timeBucket)
             .AddPagination(pageSize, useMetaData: true)
-            .AddPageLink(pageLink ?? BxPageLink.Empty)
+            .AddPageLink(pageLink ?? BxPageLinks.PageLink.Empty)
             .Build();
 
         return await httpClient.Get<List<MarketCandle>>(bxPath);

@@ -2,21 +2,9 @@ using System.Net;
 
 namespace Bullish;
 
-public sealed record BxHttpError
+public sealed record BxHttpError(int ErrorCode, string ErrorCodeName, string Message, object Raw)
 {
-    public required int ErrorCode { get; init; }
-    public required string ErrorCodeName { get; init; }
-    public required string Message { get; init; }
-    public required object Raw { get; init; }
-
-    // TODO: Update various constructors to Record style :this() { }
-    public static BxHttpError Empty => new()
-    {
-        ErrorCode = 0,
-        ErrorCodeName = string.Empty,
-        Message = string.Empty,
-        Raw = new object(),
-    };
+    public BxHttpError() : this(0, string.Empty, string.Empty, new object()) { }
 
     public static BxHttpError Error(string message) => new()
     {

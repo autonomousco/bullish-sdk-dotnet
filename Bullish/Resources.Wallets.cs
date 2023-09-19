@@ -1,3 +1,5 @@
+using Bullish.Internals;
+
 namespace Bullish;
 
 public static partial class Resources
@@ -7,11 +9,11 @@ public static partial class Resources
     /// </summary>
     /// <param name="pageSize">The number of candles to return 5, 25, 50, 100, default value is 25</param>
     /// <param name="pageLink">Get the results for the next or previous page</param>
-    public static async Task<BxHttpResponse<List<WalletTransaction>>> GetTransactions(this BxHttpClient httpClient, int pageSize = 25, BxPageLink? pageLink = null)
+    public static async Task<BxHttpResponse<List<WalletTransaction>>> GetTransactions(this BxHttpClient httpClient, int pageSize = 25, BxPageLinks.PageLink? pageLink = null)
     {
-        var bxPath = new BxPathBuilder(BxApiEndpoint.WalletsTransactions)
+        var bxPath = new EndpointPathBuilder(BxApiEndpoint.WalletsTransactions)
             .AddPagination(pageSize, useMetaData: true)
-            .AddPageLink(pageLink ?? BxPageLink.Empty)
+            .AddPageLink(pageLink ?? BxPageLinks.PageLink.Empty)
             .Build();
         
         return await httpClient.Get<List<WalletTransaction>>(bxPath);
@@ -23,7 +25,7 @@ public static partial class Resources
     /// <param name="symbol"></param>
     public static async Task<BxHttpResponse<WalletWithdrawalLimit>> GetWithdrawalLimits(this BxHttpClient httpClient, string symbol = "")
     {
-        var bxPath = new BxPathBuilder(BxApiEndpoint.WalletsLimitsSymbol)
+        var bxPath = new EndpointPathBuilder(BxApiEndpoint.WalletsLimitsSymbol)
             .AddResourceId(symbol)
             .Build();
         
@@ -36,7 +38,7 @@ public static partial class Resources
     /// <param name="symbol"></param>
     public static async Task<BxHttpResponse<List<WalletDepositCrypto>>> GetDepositInstructionsCrypto(this BxHttpClient httpClient, string symbol = "")
     {
-        var bxPath = new BxPathBuilder(BxApiEndpoint.WalletsDepositInstructionsCryptoSymbol)
+        var bxPath = new EndpointPathBuilder(BxApiEndpoint.WalletsDepositInstructionsCryptoSymbol)
             .AddResourceId(symbol)
             .Build();
 
@@ -50,7 +52,7 @@ public static partial class Resources
     /// <param name="symbol"></param>
     public static async Task<BxHttpResponse<List<WalletWithdrawalCrypto>>> GetWithdrawalInstructionsCrypto(this BxHttpClient httpClient, string symbol = "")
     {
-        var bxPath = new BxPathBuilder(BxApiEndpoint.WalletsWithdrawalInstructionsCryptoSymbol)
+        var bxPath = new EndpointPathBuilder(BxApiEndpoint.WalletsWithdrawalInstructionsCryptoSymbol)
             .AddResourceId(symbol)
             .Build();
 
@@ -63,7 +65,7 @@ public static partial class Resources
     /// <param name="symbol"></param>
     public static async Task<BxHttpResponse<List<WalletDepositFiat>>> GetDepositInstructionsFiat(this BxHttpClient httpClient, string symbol = "")
     {
-        var bxPath = new BxPathBuilder(BxApiEndpoint.WalletsDepositInstructionsFiatSymbol)
+        var bxPath = new EndpointPathBuilder(BxApiEndpoint.WalletsDepositInstructionsFiatSymbol)
             .AddResourceId(symbol)
             .Build();
 
@@ -77,7 +79,7 @@ public static partial class Resources
     /// <param name="symbol"></param>
     public static async Task<BxHttpResponse<List<WalletWithdrawalFiat>>> GetWithdrawalInstructionsFiat(this BxHttpClient httpClient, string symbol = "")
     {
-        var bxPath = new BxPathBuilder(BxApiEndpoint.WalletsWithdrawalInstructionsFiatSymbol)
+        var bxPath = new EndpointPathBuilder(BxApiEndpoint.WalletsWithdrawalInstructionsFiatSymbol)
             .AddResourceId(symbol)
             .Build();
 
