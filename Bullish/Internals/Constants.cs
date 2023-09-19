@@ -1,6 +1,4 @@
-using Bullish.Internals;
-
-namespace Bullish;
+namespace Bullish.Internals;
 
 internal static class Constants
 {

@@ -5,15 +5,15 @@ public record Order
     public required string Handle { get; init; }
     public required string OrderId { get; init; }
     public required string Symbol { get; init; }
-    public required string Price { get; init; }
-    public required string AverageFillPrice { get; init; }
-    public required string StopPrice { get; init; }
+    public required decimal Price { get; init; }
+    public required decimal AverageFillPrice { get; init; }
+    public required decimal StopPrice { get; init; }
     public required bool Margin { get; init; }
-    public required string Quantity { get; init; }
-    public required string QuantityFilled { get; init; }
-    public required string BaseFee { get; init; }
-    public required string QuoteFee { get; init; }
-    public required string BorrowedQuantity { get; init; }
+    public required decimal Quantity { get; init; }
+    public required decimal QuantityFilled { get; init; }
+    public required decimal BaseFee { get; init; }
+    public required decimal QuoteFee { get; init; }
+    public required decimal BorrowedQuantity { get; init; }
     public required bool IsLiquidation { get; init; }
     public required string Side { get; init; }
     public required string Type { get; init; }

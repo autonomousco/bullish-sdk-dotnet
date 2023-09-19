@@ -9,7 +9,7 @@ public static partial class Resources
     /// <summary>
     /// Gets the orders list based on specified filters.
     /// </summary>
-    /// <param name="symbol"></param>
+    /// <param name="symbol">Order symbol</param>
     /// <param name="handle">Unique numeric identifier generated on the client side expressed as a string value</param>
     /// <param name="orderSide">Order side</param>
     /// <param name="orderStatus">Order status</param>

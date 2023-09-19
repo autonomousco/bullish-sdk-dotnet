@@ -1,4 +1,4 @@
-namespace Bullish;
+namespace Bullish.Internals;
 
 internal interface ICommand { }
 
