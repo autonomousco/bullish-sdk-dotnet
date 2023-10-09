@@ -53,7 +53,7 @@ public static partial class Resources
             .AddQueryParam("test", isTest)
             .Build();
 
-        var command = new CreateOrderCommand(
+        var command = new CreateOrderCommand("V1CreateOrder",
             Handle: string.IsNullOrWhiteSpace(handle) ? null : handle,
             Symbol: symbol,
             Type: type.ToString().ToUpperInvariant(), Side: side.ToString().ToUpperInvariant(),
@@ -63,7 +63,7 @@ public static partial class Resources
             TimeInForce: timeInForce == OrderTimeInForce.None ? null : timeInForce.ToString().ToUpperInvariant(),
             AllowMargin: allowMargin);
 
-        return await httpClient.Post<CreateOrder, CreateOrderCommand>(bxPath,command);
+        return await httpClient.Post<CreateOrder, CreateOrderCommand>(bxPath, command);
     }
 
     public static async Task<BxHttpResponse<CancelAllOrders>> CancelAllOpenOrders(this BxHttpClient httpClient, string tradingAccountId)
@@ -71,7 +71,7 @@ public static partial class Resources
         var bxPath = new EndpointPathBuilder(BxApiEndpoint.CommandCancelAllOpenOrders)
             .Build();
 
-        var command = new CancelAllOrdersCommand(tradingAccountId);
+        var command = new CancelAllOrdersCommand("V1CancelAllOrders", tradingAccountId);
 
         return await httpClient.Post<CancelAllOrders, CancelAllOrdersCommand>(bxPath, command);
     }
@@ -81,8 +81,39 @@ public static partial class Resources
         var bxPath = new EndpointPathBuilder(BxApiEndpoint.CommandCancelAllOpenOrders)
             .Build();
 
-        var command = new CancelAllOrdersByMarketCommand(symbol, tradingAccountId);
+        var command = new CancelAllOrdersByMarketCommand("V1CancelAllOrdersByMarket", symbol, tradingAccountId);
 
         return await httpClient.Post<CancelAllOrders, CancelAllOrdersByMarketCommand>(bxPath, command);
     }
+
+    public static async Task<BxHttpResponse<Empty>> CancelOrder(this BxHttpClient httpClient, string tradingAccountId, string symbol, string orderId = "", string handle = "", bool isTest = false)
+    {
+        var bxPathBuilder = new EndpointPathBuilder(BxApiEndpoint.Orders)
+            .AddQueryParam("tradingAccountId", tradingAccountId)
+            .AddQueryParam("symbol", symbol);
+
+        if (!string.IsNullOrWhiteSpace(orderId))
+            bxPathBuilder.AddQueryParam("orderId", orderId);
+        else if (!string.IsNullOrWhiteSpace(handle))
+            bxPathBuilder.AddQueryParam("handle", handle);
+
+        bxPathBuilder.AddQueryParam("test", isTest)
+            .Build();
+
+        var bxPath = bxPathBuilder.Build();
+
+        var command = new CancelOrderCommand("V2CancelOrder",
+            OrderId: string.IsNullOrWhiteSpace(orderId) ? null : orderId,
+            Handle: string.IsNullOrWhiteSpace(handle) ? null : handle,
+            Symbol: symbol,
+            TradingAccountId: tradingAccountId);
+
+        return await httpClient.Delete<Empty, CancelOrderCommand>(bxPath, command);
+    }
+
+    // TODO: Cancel All Open Limit Orders after Delay
+    // POST /command?commandType=V1DelayedCancelAllOrders
+
+    // TODO: Cancel All Open Limit Orders after Delay Disable
+    // POST /command?commandType=V1UnsetDelayedCancelAllOrders
 }

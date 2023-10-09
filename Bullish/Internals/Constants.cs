@@ -14,6 +14,7 @@ internal static class Constants
     public static Dictionary<BxApiEndpoint, Endpoint> BxApiEndpoints = new()
     {
         { BxApiEndpoint.Login, new Endpoint("/users/login", "/v2", false) },
+        { BxApiEndpoint.LoginHmac, new Endpoint("/users/hmac/login", "/v1", false) },
         { BxApiEndpoint.Logout, new Endpoint("/users/logout", "/v1", true) },
         { BxApiEndpoint.Nonce, new Endpoint("/nonce", "/v1", false) },
         { BxApiEndpoint.Time, new Endpoint("/time", "/v1", false) },

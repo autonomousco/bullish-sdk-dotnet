@@ -56,6 +56,12 @@ public enum TimeBucket
     OneDay,
 }
 
+public enum AuthMode
+{
+    Hmac,
+    Eos,
+}
+
 public enum BxApiServer
 {
     Production,
@@ -68,6 +74,7 @@ public enum BxApiServer
 internal enum BxApiEndpoint
 {
     Login,
+    LoginHmac,
     Logout,
     Nonce,
     Time,

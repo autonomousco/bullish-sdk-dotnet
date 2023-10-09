@@ -17,7 +17,7 @@ internal sealed record Nonce
     {
         if (Value == -1)
         {
-            Value = LowerBound;
+            Value = DateTime.UtcNow.ToUnixTimeMicroseconds();
             return Value;
         }
 

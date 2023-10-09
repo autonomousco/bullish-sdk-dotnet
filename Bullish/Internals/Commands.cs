@@ -1,14 +1,14 @@
 namespace Bullish.Internals;
 
-internal interface ICommand { }
-
-internal record Command(string CommandType, string Timestamp, string Nonce, string Authorizer) 
+internal interface ICommand
 {
-    protected Command(string commandType) : this(commandType, string.Empty, string.Empty, string.Empty) { }
+    public string CommandType { get; }
 }
 
-internal sealed record CancelAllOrdersCommand(string TradingAccountId) : Command("V1CancelAllOrders"), ICommand;
+internal sealed record CancelAllOrdersCommand(string CommandType, string TradingAccountId) : ICommand { }
 
-internal sealed record CancelAllOrdersByMarketCommand(string Symbol, string TradingAccountId) : Command("V1CancelAllOrdersByMarket"), ICommand;
+internal sealed record CancelAllOrdersByMarketCommand(string CommandType, string Symbol, string TradingAccountId) : ICommand { }
 
-internal sealed record CreateOrderCommand(string? Handle, string Symbol, string Type, string Side, string? Price, string? StopPrice, string Quantity, string? TimeInForce, bool AllowMargin) : Command("V1CreateOrder"), ICommand;
+internal sealed record CreateOrderCommand(string CommandType, string? Handle, string Symbol, string Type, string Side, string? Price, string? StopPrice, string Quantity, string? TimeInForce, bool AllowMargin) : ICommand { }
+
+internal sealed record CancelOrderCommand(string CommandType, string? OrderId, string? Handle, string Symbol, string TradingAccountId) : ICommand { }
