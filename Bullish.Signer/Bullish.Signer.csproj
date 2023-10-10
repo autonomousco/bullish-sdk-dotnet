@@ -4,11 +4,24 @@
         <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <PackageId>Bullish.Signer</PackageId>
+        <Title>Bullish API Client Signer</Title>
+        <Authors>Autonomous Ltd</Authors>
+        <Description>Request signer to support the .NET native SDK for the Bullish Exchange https://bullish.com/</Description>
+        <PackageProjectUrl>https://github.com/autonomousco/bullish-sdk-dotnet</PackageProjectUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <RepositoryUrl>https://github.com/autonomousco/bullish-sdk-dotnet</RepositoryUrl>
+        <RepositoryType>Github</RepositoryType>
+        <PackageReleaseNotes>Initial Release. Uses SECP256R1 via BouncyCastle for custom EOS-style message signing.</PackageReleaseNotes>
+        <Copyright>Shaun Sales, Autonomous Ltd</Copyright>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <Version>1.0.0</Version>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="BouncyCastle.Cryptography" Version="2.2.1" />
-      <PackageReference Include="SimpleBase" Version="4.0.0" />
+        <PackageReference Include="BouncyCastle.Cryptography" Version="2.2.1"/>
+        <PackageReference Include="SimpleBase" Version="4.0.0"/>
+        <None Include="README.md" Pack="true" PackagePath="\"/>
     </ItemGroup>
 
 </Project>
