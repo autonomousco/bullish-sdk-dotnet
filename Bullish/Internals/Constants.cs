@@ -13,7 +13,7 @@ internal static class Constants
 
     public static Dictionary<BxApiEndpoint, Endpoint> BxApiEndpoints = new()
     {
-        { BxApiEndpoint.Login, new Endpoint("/users/login", "/v2", false) },
+        // { BxApiEndpoint.Login, new Endpoint("/users/login", "/v2", false) }, // Old EOS style authentication, deprecated March 2024
         { BxApiEndpoint.LoginHmac, new Endpoint("/users/hmac/login", "/v1", false) },
         { BxApiEndpoint.Logout, new Endpoint("/users/logout", "/v1", true) },
         { BxApiEndpoint.Nonce, new Endpoint("/nonce", "/v1", false) },
@@ -21,10 +21,10 @@ internal static class Constants
         { BxApiEndpoint.AccountsAsset, new Endpoint("/accounts/asset", "/v1", true) },
         { BxApiEndpoint.AccountsAssetSymbol, new Endpoint("/accounts/asset/{symbol}", "/v1", true) },
         { BxApiEndpoint.AccountsTradingAccounts, new Endpoint("/accounts/trading-accounts", "/v1", true) },
-        { BxApiEndpoint.Orders, new Endpoint("/orders", "/v1", true) },
-        { BxApiEndpoint.OrdersOrderId, new Endpoint("/orders/{orderId}", "/v1", true) },
-        { BxApiEndpoint.AmmInstructions, new Endpoint("/amm-instructions", "/v1", true) },
-        { BxApiEndpoint.AmmInstructionsLiquidityId, new Endpoint("/amm-instructions/{liquidityId}", "/v1", true) },
+        { BxApiEndpoint.Orders, new Endpoint("/orders", "/v2", true) },
+        { BxApiEndpoint.OrdersOrderId, new Endpoint("/orders/{orderId}", "/v2", true) },
+        { BxApiEndpoint.AmmInstructions, new Endpoint("/amm-instructions", "/v2", true) },
+        { BxApiEndpoint.AmmInstructionsLiquidityId, new Endpoint("/amm-instructions/{instructionid}", "/v1", true) },
         { BxApiEndpoint.WalletsTransactions, new Endpoint("/wallets/transactions", "/v1", true) },
         { BxApiEndpoint.WalletsLimitsSymbol, new Endpoint("/wallets/limits/{symbol}", "/v1", true) },
         { BxApiEndpoint.WalletsDepositInstructionsCryptoSymbol, new Endpoint("/wallets/deposit-instructions/crypto/{symbol}", "/v1", true) },
@@ -43,7 +43,14 @@ internal static class Constants
         { BxApiEndpoint.HistoryBorrowInterest, new Endpoint("/history/borrow-interest", "/v1", true) },
         { BxApiEndpoint.MarketsSymbolTick, new Endpoint("/markets/{symbol}/tick", "/v1", false) },
         { BxApiEndpoint.MarketsSymbolCandle, new Endpoint("/markets/{symbol}/candle", "/v1", false) },
-        { BxApiEndpoint.CommandCancelAllOpenOrders, new Endpoint("/command?commandType=V1CancelAllOrders", "/v1", true) },
-        { BxApiEndpoint.CommandCancelAllOpenOrdersByMarket, new Endpoint("/command?commandType=V1CancelAllOrdersByMarket", "/v1", true) },
+        { BxApiEndpoint.Command, new Endpoint("/command", "/v2", true) },
+        // TODO: 
+        // V3CancelOrder
+        // V1CancelAllOrders
+        // V1CancelAllOrdersByMarket
+        // V1DelayedCancelAllOrders
+        // V1UnsetDelayedCancelAllOrders
+        // V3TerminateAMMInstruction
+        // V2TransferAsset
     };
 }

@@ -16,9 +16,9 @@ public enum OrderSide
 public enum OrderType
 {
     None = 0,
-    Lmt,
-    Mkt,
-    STOP_LIMIT,
+    Limit,
+    Market,
+    Stop_Limit,
 }
 
 public enum OrderTimeInForce
@@ -59,7 +59,8 @@ public enum TimeBucket
 public enum AuthMode
 {
     Hmac,
-    Eos,
+    Ecdsa,
+    //Eos,
 }
 
 public enum BxApiServer
@@ -103,6 +104,5 @@ internal enum BxApiEndpoint
     HistoryBorrowInterest,
     MarketsSymbolTick,
     MarketsSymbolCandle,
-    CommandCancelAllOpenOrders,
-    CommandCancelAllOpenOrdersByMarket,
+    Command,
 }

@@ -1,9 +1,5 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bullish.Signer", "Bullish.Signer\Bullish.Signer.csproj", "{6D38DFC0-95CA-4BB4-B99E-9C9ED6F9E6EA}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bullish.Signer.Tests", "Bullish.Signer.Tests\Bullish.Signer.Tests.csproj", "{874B6752-24E5-4BC8-BF47-D251CA156611}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bullish.Api.Client", "Bullish\Bullish.csproj", "{E5D1429D-CC93-4001-9F22-BE58AB6C8FA2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bullish.Tests", "Bullish.Tests\Bullish.Tests.csproj", "{40A2D4F2-D3D0-4528-A1AF-686A40E0ADF2}"
@@ -14,14 +10,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{6D38DFC0-95CA-4BB4-B99E-9C9ED6F9E6EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6D38DFC0-95CA-4BB4-B99E-9C9ED6F9E6EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6D38DFC0-95CA-4BB4-B99E-9C9ED6F9E6EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6D38DFC0-95CA-4BB4-B99E-9C9ED6F9E6EA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{874B6752-24E5-4BC8-BF47-D251CA156611}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{874B6752-24E5-4BC8-BF47-D251CA156611}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{874B6752-24E5-4BC8-BF47-D251CA156611}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{874B6752-24E5-4BC8-BF47-D251CA156611}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E5D1429D-CC93-4001-9F22-BE58AB6C8FA2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E5D1429D-CC93-4001-9F22-BE58AB6C8FA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E5D1429D-CC93-4001-9F22-BE58AB6C8FA2}.Release|Any CPU.ActiveCfg = Release|Any CPU

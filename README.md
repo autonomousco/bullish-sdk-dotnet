@@ -1,49 +1,40 @@
 # Bullish API Client for .NET
 
-A .NET API client and signer for the Bullish Exchange API. Documentation for the API can be found [here](https://api.exchange.bullish.com/docs/api/rest/)
+A native .NET API client for the Bullish Exchange API. Documentation for the API can be found [here](https://api.exchange.bullish.com/docs/api/rest/)
 
 ## Using the API Client
 
-Add a reference to Bullish.Api.Client and instantiate the BxHttpClient with your API key and metadata.
+Add a reference to the Bullish namespace and instantiate the `BxHttpClient` with your API key. If you instantiate `BxHttpClient` without any API keys, only access to public endpoints will work. 
 
 ```csharp
-using Bullish.Api.Client;
+// Without API Keys (public endpoints only)
+using Bullish;
 
-const string Metadata = "eyJhY2Nv...";
-const string PublicKey = "PUB_R1_8aUu...";
-const string PrivateKey = "PVT_R1_2Yuu....";
+var bxHttpClient = new BxHttpClient();
 
-var bxHttpClient = new BxHttpClient(PublicKey, PrivateKey, Metadata);
+var marketResponse = await bxHttpClient.GetMarket("BTCUSDC");
+
+if(marketResponse.IsSuccess)
+{
+    var market = marketResponse.Result;
+    var minNotional = market.MinCostLimit;
+}
 ```
 
-Now call `Login` to initialize the API client with the JWT and nonce.
-
 ```csharp
-await bxHttpClient.Login();
-```
+// With API Keys
+using Bullish;
 
-## Using the Signer
-Bullish uses the EOS WIF key format for public and private keys. For information about the format of keys you can review the [EOS Wallet Specification](https://developers.eos.io/manuals/eos/v2.0/keosd/wallet-specification)
+const string PublicKey = "HMAC-9955...";
+const string PrivateKey = "b6526ed3...";
 
-Luckily all of this is taken care of by `Bullish.Signer`. 
+var bxHttpClient = new BxHttpClient(PublicKey, PrivateKey, autoLogin: true);
 
-To directly sign you own requests and bypass the API client, simply use the `RequestSigner`.
+var resp = await bxHttpClient.Login();
 
+var tradingAccounts = await bxHttpClient.GetTradingAccounts();
 
-Creating the EOS key objects and signing:
-```csharp
-var jsonPayload = "{ foo: 42 }";
-var privateKey = RequestSigner.GetEosPrivateKey(eosWifPrivateKey);
-var publicKey = RequestSigner.GetEosPublicKey(eosWifPublicKey);
+var tradingAccount = tradingAccounts.Result.First();
 
-var signature = RequestSigner.Sign(privateKey, publicKey, jsonPayload);
-```
-
-Signing directly using the EOS WIF formatted keys:
-```csharp
-var jsonPayload = "{ foo: 42 }";
-var privateKey = "PVT_R1_2Yuu....";
-var publicKey = "PUB_R1_8aUu...";
-
-var signature = RequestSigner.Sign(privateKey, publicKey, jsonPayload);
+var order = await bxHttpClient.GetOrder("1234567890", tradingAccount.TradingAccountId);
 ```

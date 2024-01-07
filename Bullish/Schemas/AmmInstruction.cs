@@ -4,7 +4,7 @@ namespace Bullish.Schemas;
 
 public record AmmInstruction
 {
-    public string LiquidityId { get; init; } = string.Empty;
+    public string InstructionId { get; init; } = string.Empty;
     public string Symbol { get; init; } = string.Empty;
     public decimal BaseFee { get; init; }
     public decimal QuoteFee { get; init; }

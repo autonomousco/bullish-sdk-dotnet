@@ -33,16 +33,18 @@ public static partial class Resources
     /// Gets an order by ID
     /// </summary>
     /// <param name="orderId">The order ID</param>
-    public static async Task<BxHttpResponse<Order>> GetOrder(this BxHttpClient httpClient, string orderId)
+    /// <param name="tradingAccountId"></param>
+    public static async Task<BxHttpResponse<Order>> GetOrder(this BxHttpClient httpClient, string orderId, string tradingAccountId)
     {
         var bxPath = new EndpointPathBuilder(BxApiEndpoint.OrdersOrderId)
             .AddResourceId(orderId)
+            .AddQueryParam("tradingAccountId", tradingAccountId)
             .Build();
 
         return await httpClient.Get<Order>(bxPath);
     }
 
-    public static async Task<BxHttpResponse<CreateOrder>> CreateOrder(this BxHttpClient httpClient, string symbol, OrderType type, OrderSide side, decimal quantity, decimal price = 0M, decimal stopPrice = 0M, OrderTimeInForce timeInForce = OrderTimeInForce.None, string handle = "", bool allowMargin = false, bool isTest = false)
+    public static async Task<BxHttpResponse<CreateOrder>> CreateOrder(this BxHttpClient httpClient, string tradingAccountId, string symbol, OrderType type, OrderSide side, decimal quantity, decimal price = 0M, decimal stopPrice = 0M, OrderTimeInForce timeInForce = OrderTimeInForce.None, string clientOrderId = "", bool allowBorrow = false)
     {
         // Do some validation
         var priceNormalized = await httpClient.FormatValue(PrecisionType.QuotePrecision, symbol, price);
@@ -50,65 +52,58 @@ public static partial class Resources
         var quantityNormalized = await httpClient.FormatValue(PrecisionType.BasePrecision, symbol, quantity);
 
         var bxPath = new EndpointPathBuilder(BxApiEndpoint.Orders)
-            .AddQueryParam("test", isTest)
             .Build();
 
-        var command = new CreateOrderCommand("V1CreateOrder",
-            Handle: string.IsNullOrWhiteSpace(handle) ? null : handle,
+        var command = new CreateOrderCommand("V3CreateOrder",
+            ClientOrderId: string.IsNullOrWhiteSpace(clientOrderId) ? null : clientOrderId,
             Symbol: symbol,
-            Type: type.ToString().ToUpperInvariant(), Side: side.ToString().ToUpperInvariant(),
+            Type: type.ToString().ToUpperInvariant(), 
+            Side: side.ToString().ToUpperInvariant(),
             Price: price == 0 ? null : priceNormalized.ToString(CultureInfo.InvariantCulture),
             StopPrice: stopPrice == 0 ? null : stopPriceNormalized.ToString(CultureInfo.InvariantCulture),
             Quantity: quantityNormalized.ToString(CultureInfo.InvariantCulture),
             TimeInForce: timeInForce == OrderTimeInForce.None ? null : timeInForce.ToString().ToUpperInvariant(),
-            AllowMargin: allowMargin);
+            AllowBorrow: allowBorrow,
+            TradingAccountId: tradingAccountId);
 
         return await httpClient.Post<CreateOrder, CreateOrderCommand>(bxPath, command);
     }
 
     public static async Task<BxHttpResponse<CancelAllOrders>> CancelAllOpenOrders(this BxHttpClient httpClient, string tradingAccountId)
     {
-        var bxPath = new EndpointPathBuilder(BxApiEndpoint.CommandCancelAllOpenOrders)
+        var bxPath = new EndpointPathBuilder(BxApiEndpoint.Command)
             .Build();
 
-        var command = new CancelAllOrdersCommand("V1CancelAllOrders", tradingAccountId);
+        var command = new CancelAllOrdersCommand("V1CancelAllOrders", 
+            TradingAccountId: tradingAccountId);
 
         return await httpClient.Post<CancelAllOrders, CancelAllOrdersCommand>(bxPath, command);
     }
 
     public static async Task<BxHttpResponse<CancelAllOrders>> CancelAllOpenOrdersByMarket(this BxHttpClient httpClient, string tradingAccountId, string symbol)
     {
-        var bxPath = new EndpointPathBuilder(BxApiEndpoint.CommandCancelAllOpenOrders)
+        var bxPath = new EndpointPathBuilder(BxApiEndpoint.Command)
             .Build();
 
-        var command = new CancelAllOrdersByMarketCommand("V1CancelAllOrdersByMarket", symbol, tradingAccountId);
+        var command = new CancelAllOrdersByMarketCommand("V1CancelAllOrdersByMarket", 
+            Symbol: symbol, 
+            TradingAccountId: tradingAccountId);
 
         return await httpClient.Post<CancelAllOrders, CancelAllOrdersByMarketCommand>(bxPath, command);
     }
 
-    public static async Task<BxHttpResponse<Empty>> CancelOrder(this BxHttpClient httpClient, string tradingAccountId, string symbol, string orderId = "", string handle = "", bool isTest = false)
+    public static async Task<BxHttpResponse<CancelOrder>> CancelOrder(this BxHttpClient httpClient, string tradingAccountId, string symbol, string orderId = "", string clientOrderId = "")
     {
-        var bxPathBuilder = new EndpointPathBuilder(BxApiEndpoint.Orders)
-            .AddQueryParam("tradingAccountId", tradingAccountId)
-            .AddQueryParam("symbol", symbol);
-
-        if (!string.IsNullOrWhiteSpace(orderId))
-            bxPathBuilder.AddQueryParam("orderId", orderId);
-        else if (!string.IsNullOrWhiteSpace(handle))
-            bxPathBuilder.AddQueryParam("handle", handle);
-
-        bxPathBuilder.AddQueryParam("test", isTest)
+        var bxPath = new EndpointPathBuilder(BxApiEndpoint.Command)
             .Build();
 
-        var bxPath = bxPathBuilder.Build();
-
-        var command = new CancelOrderCommand("V2CancelOrder",
+        var command = new CancelOrderCommand("V3CancelOrder",
             OrderId: string.IsNullOrWhiteSpace(orderId) ? null : orderId,
-            Handle: string.IsNullOrWhiteSpace(handle) ? null : handle,
+            ClientOrderId: string.IsNullOrWhiteSpace(clientOrderId) ? null : clientOrderId,
             Symbol: symbol,
             TradingAccountId: tradingAccountId);
 
-        return await httpClient.Delete<Empty, CancelOrderCommand>(bxPath, command);
+        return await httpClient.Post<CancelOrder, CancelOrderCommand>(bxPath, command);
     }
 
     // TODO: Cancel All Open Limit Orders after Delay

@@ -4,7 +4,6 @@ using System.Text;
 using System.Text.Json.Nodes;
 using Bullish.Internals;
 using Bullish.Schemas;
-using Bullish.Signer;
 
 namespace Bullish;
 
@@ -16,7 +15,6 @@ public sealed class BxHttpClient
     private readonly AuthMode _authMode;
     private readonly string _publicKey = string.Empty;
     private readonly string _privateKey = string.Empty;
-    private readonly Metadata _metadata = Metadata.Empty;
 
     private Nonce _nonce = Nonce.Empty;
     private AuthToken _authToken = AuthToken.Empty;
@@ -29,7 +27,7 @@ public sealed class BxHttpClient
         _apiServer = Constants.BxApiServers[apiServer];
     }
 
-    public BxHttpClient(string publicKey, string privateKey, string metadata = "", BxApiServer apiServer = BxApiServer.Production, bool autoLogin = false)
+    public BxHttpClient(string publicKey, string privateKey, BxApiServer apiServer = BxApiServer.Production, bool autoLogin = false)
     {
         _publicKey = !string.IsNullOrWhiteSpace(publicKey) ? publicKey : throw new Exception("Public key cannot be empty.");
         _privateKey = !string.IsNullOrWhiteSpace(privateKey) ? privateKey : throw new Exception("Private key cannot be empty.");
@@ -37,17 +35,8 @@ public sealed class BxHttpClient
         _authMode = publicKey[..4].ToUpperInvariant() switch
         {
             "HMAC" => AuthMode.Hmac,
-            "PUB_" => AuthMode.Eos,
             _ => throw new ArgumentException("Public key type is not supported.")
         };
-
-        if (_authMode == AuthMode.Eos)
-        {
-            if (string.IsNullOrWhiteSpace(metadata))
-                throw new Exception("Metadata cannot be empty when using EOS authentication.");
-
-            _metadata = Extensions.DeserializeBase64<Metadata>(metadata) ?? throw new ArgumentException("Invalid metadata");
-        }
 
         _apiServer = Constants.BxApiServers[apiServer];
         _autoLogin = autoLogin;
@@ -104,44 +93,6 @@ public sealed class BxHttpClient
         return await ProcessResponse<Login>(response);
     }
 
-    private async Task<BxHttpResponse<Login>> LoginEos()
-    {
-        var bxPath = new EndpointPathBuilder(BxApiEndpoint.Login)
-            .Build();
-
-        var url = $"{_apiServer}{bxPath.Path}";
-
-        var nonce = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-
-        var loginPayload = new
-        {
-            UserId = _metadata.UserId,
-            Nonce = nonce,
-            ExpirationTime = nonce + 300,
-            BiometricsUsed = false,
-            SessionKey = (string?)null,
-        };
-
-        var payloadJson = Extensions.Serialize(loginPayload);
-
-        var signature = RequestSigner.Sign(_privateKey, _publicKey, payloadJson);
-
-        var login = new
-        {
-            PublicKey = _publicKey,
-            LoginPayload = loginPayload,
-            Signature = signature,
-        };
-
-        var httpClient = new HttpClient();
-
-        var bodyJson = Extensions.Serialize(login);
-
-        var response = await httpClient.PostAsync(url, new StringContent(bodyJson, new MediaTypeHeaderValue("application/json")));
-
-        return await ProcessResponse<Login>(response);
-    }
-
     /// <summary>
     /// The API uses bearer based authentication. A JWT token is valid for 24 hours only.
     /// Sessions are currently tracked per user, and each user is allowed to create a maximum of 500 concurrent sessions.
@@ -155,8 +106,8 @@ public sealed class BxHttpClient
 
         var loginResponse = _authMode switch
         {
-            AuthMode.Eos => await LoginEos(),
             AuthMode.Hmac => await LoginHmac(),
+            AuthMode.Ecdsa => throw new NotImplementedException("ECDSA Authentication is coming soon"),
             _ => throw new ArgumentException("Invalid authentication mode")
         };
 
@@ -208,23 +159,19 @@ public sealed class BxHttpClient
                 throw new Exception("No valid JWT was found. Please login.");
         }
 
-        // Authorize the command with data available only after login
-        var commandBody = new
-        {
-            Timestamp = $"{DateTime.UtcNow.ToUnixTimeMilliseconds()}",
-            Nonce = $"{_nonce.NextValue()}",
-            Authorizer = _authorizer,
-            Command = command,
-        };
+        var timestamp = $"{DateTime.UtcNow.ToUnixTimeMilliseconds()}";
+        var nonce = $"{_nonce.NextValue()}";
 
-        var bodyJson = Extensions.Serialize(commandBody);
+        var bodyJson = Extensions.Serialize(command);
 
-        var signature = Sign(bodyJson, _privateKey, _publicKey, _authMode);
+        var signature = path.Path.Contains("/v2/") ? 
+            SignV2(timestamp, nonce, "POST", $"/trading-api{path.Path}", bodyJson, _privateKey, _authMode) : 
+            Sign(bodyJson, _privateKey, _authMode);
 
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _authToken.Jwt);
         httpClient.DefaultRequestHeaders.Add("BX-SIGNATURE", signature);
-        httpClient.DefaultRequestHeaders.Add("BX-TIMESTAMP", commandBody.Timestamp);
-        httpClient.DefaultRequestHeaders.Add("BX-NONCE", commandBody.Nonce);
+        httpClient.DefaultRequestHeaders.Add("BX-TIMESTAMP", timestamp);
+        httpClient.DefaultRequestHeaders.Add("BX-NONCE", nonce);
         httpClient.DefaultRequestHeaders.Add("BX-NONCE-WINDOW-ENABLED", "false");
 
         #endregion
@@ -263,7 +210,7 @@ public sealed class BxHttpClient
 
         var bodyJson = Extensions.Serialize(commandBody);
 
-        var signature = Sign(bodyJson, _privateKey, _publicKey, _authMode);
+        var signature = Sign(bodyJson, _privateKey, _authMode);
 
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _authToken.Jwt);
         httpClient.DefaultRequestHeaders.Add("BX-SIGNATURE", signature);
@@ -348,12 +295,11 @@ public sealed class BxHttpClient
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
-            return BxHttpResponse<TResult>.Failure(BxHttpError.Error(response.StatusCode, json));
+            return BxHttpResponse<TResult>.Failure(BxHttpError.Error(response.StatusCode, $"Error{ex.Message}, JSON:{json}"));
         }
     }
 
-    private static string Sign(string message, string privateKey, string publicKey, AuthMode authMode)
+    private static string Sign(string message, string privateKey, AuthMode authMode)
     {
         switch (authMode)
         {
@@ -367,8 +313,27 @@ public sealed class BxHttpClient
 
                 return Convert.ToHexString(hmacDigest).ToLowerInvariant();
             }
-            case AuthMode.Eos:
-                return RequestSigner.Sign(privateKey, publicKey, message);
+            default:
+                throw new Exception("Invalid AuthMode for signing.");
+        }
+    }
+
+    private static string SignV2(string timestamp, string nonce, string method, string path, string bodyJson, string privateKey, AuthMode authMode)
+    {
+        var message = $"{timestamp}{nonce}{method}{path}{bodyJson}";
+
+        switch (authMode)
+        {
+            case AuthMode.Hmac:
+            {
+                var shaDigest = SHA256.HashData(Encoding.UTF8.GetBytes(message));
+                var hexSha = Convert.ToHexString(shaDigest).ToLowerInvariant();
+
+                using var hmacSha256 = new HMACSHA256(Encoding.UTF8.GetBytes(privateKey));
+                var hmacDigest = hmacSha256.ComputeHash(Encoding.UTF8.GetBytes(hexSha));
+
+                return Convert.ToHexString(hmacDigest).ToLowerInvariant();
+            }
             default:
                 throw new Exception("Invalid AuthMode for signing.");
         }
