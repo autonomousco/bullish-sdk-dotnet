@@ -40,6 +40,10 @@ var order = await bxHttpClient.GetOrder("1234567890", tradingAccount.TradingAcco
 ```
 
 ### Version History
+* Version 1.1.1 - Jan 8, 2024
+  * Fixed AverageFillPrice null on rejected order throwing a deserialization exception
+
+
 * Version 1.1.0 - Jan 8, 2024
     * Updated to .NET 8.0
     * Deprecated EOS Signer
