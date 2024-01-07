@@ -6,7 +6,7 @@ public record Order
     public string OrderId { get; init; } = string.Empty;
     public string Symbol { get; init; } = string.Empty;
     public decimal Price { get; init; }
-    public decimal AverageFillPrice { get; init; }
+    public decimal? AverageFillPrice { get; init; }
     public decimal? StopPrice { get; init; }
     public bool AllowBorrow { get; init; }
     public decimal Quantity { get; init; }
