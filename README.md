@@ -38,3 +38,24 @@ var tradingAccount = tradingAccounts.Result.First();
 
 var order = await bxHttpClient.GetOrder("1234567890", tradingAccount.TradingAccountId);
 ```
+
+### Version History
+* Version 1.1.0 - Jan 8, 2024
+    * Updated to .NET 8.0
+    * Deprecated EOS Signer
+    * Added support for V2 HMAC signing 
+    * Updated OrderType enum
+    * Updated Orders, AMMInstructions and Commands to match new V2 API
+
+
+* Version 1.0.1 - Oct 9, 2023
+  * Added HMAC support
+  * Added CancelOrder command
+  * Fixed Nonce not initializing with current UnixMs
+  * Updated Commands to fix JSON serialization field ordering
+  * Fixed TradingAccount schema to support nullable Maker/Taker Fees
+  * Made BxHttpResponse TResult not nullable for NRT compatibility
+
+
+* Version 1.0.0 - Sep 20, 2023
+    * Initial Alpha Release

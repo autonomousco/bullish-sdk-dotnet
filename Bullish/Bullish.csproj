@@ -12,10 +12,10 @@
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <RepositoryUrl>https://github.com/autonomousco/bullish-sdk-dotnet</RepositoryUrl>
         <RepositoryType>Github</RepositoryType>
-        <PackageReleaseNotes>Initial WIP Release</PackageReleaseNotes>
+        <PackageReleaseNotes>See README.md for release notes.</PackageReleaseNotes>
         <Copyright>Shaun Sales, Autonomous Ltd</Copyright>
         <PackageReadmeFile>README.md</PackageReadmeFile>
-        <Version>1.0.1</Version>
+        <Version>1.1.0</Version>
     </PropertyGroup>
 
     <ItemGroup>
