@@ -28,7 +28,12 @@ using Bullish;
 const string PublicKey = "HMAC-9955...";
 const string PrivateKey = "b6526ed3...";
 
-var bxHttpClient = new BxHttpClient(PublicKey, PrivateKey, autoLogin: true);
+var bxHttpClient = new BxHttpClient(PublicKey, PrivateKey);
+// Additionally you can specify these optional parameters:
+//   MetaData: Only needed if using ECDSA Authentication 
+//   AuthMode: Specify an Authentication Mode, either ECDSA or HMAC
+//   ApiServer: The Bullish server to use. i.e. Production, Sandbox etc 
+//   AutoLogin: Should the client automatically login when a request is made
 
 var resp = await bxHttpClient.Login();
 
@@ -39,27 +44,35 @@ var tradingAccount = tradingAccounts.Result.First();
 var order = await bxHttpClient.GetOrder("1234567890", tradingAccount.TradingAccountId);
 ```
 
-### Version History
-* Version 1.1.1 - Jan 8, 2024
-  * Fixed AverageFillPrice null on rejected order throwing a deserialization exception
-
-
-* Version 1.1.0 - Jan 8, 2024
-    * Updated to .NET 8.0
-    * Deprecated EOS Signer
-    * Added support for V2 HMAC signing 
-    * Updated OrderType enum
-    * Updated Orders, AMMInstructions and Commands to match new V2 API
-
-
-* Version 1.0.1 - Oct 9, 2023
-  * Added HMAC support
-  * Added CancelOrder command
-  * Fixed Nonce not initializing with current UnixMs
-  * Updated Commands to fix JSON serialization field ordering
-  * Fixed TradingAccount schema to support nullable Maker/Taker Fees
-  * Made BxHttpResponse TResult not nullable for NRT compatibility
-
-
-* Version 1.0.0 - Sep 20, 2023
-    * Initial Alpha Release
+## Version History
+#### Version 1.1.3 - Jan 27, 2024
+- Added ECDSA signing for trading commands
+---
+#### Version 1.1.2 - Jan 27, 2024
+- Added support for ECDSA login
+- Updated NuGet package references
+- Added order book and market trades tests
+- Removed redundant async await modifiers from API calls
+- Automatically logout if JWT session exists when logging in
+---
+#### Version 1.1.1 - Jan 8, 2024
+- Fixed AverageFillPrice null on rejected order throwing a deserialization exception
+---
+#### Version 1.1.0 - Jan 8, 2024
+- Updated to .NET 8.0
+- Deprecated EOS Signer
+- Added support for V2 HMAC signing 
+- Updated OrderType enum
+- Updated Orders, AMMInstructions and Commands to match new V2 API
+---
+#### Version 1.0.1 - Oct 9, 2023
+- Added HMAC support
+- Added CancelOrder command
+- Fixed Nonce not initializing with current UnixMs
+- Updated Commands to fix JSON serialization field ordering
+- Fixed TradingAccount schema to support nullable Maker/Taker Fees
+- Made BxHttpResponse TResult not nullable for NRT compatibility
+---
+#### Version 1.0.0 - Sep 20, 2023
+- Initial Alpha Release
+---

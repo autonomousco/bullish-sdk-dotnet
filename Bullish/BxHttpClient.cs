@@ -15,6 +15,7 @@ public sealed class BxHttpClient
     private readonly AuthMode _authMode;
     private readonly string _publicKey = string.Empty;
     private readonly string _privateKey = string.Empty;
+    private readonly Metadata _metaData = Metadata.Empty;
 
     private Nonce _nonce = Nonce.Empty;
     private AuthToken _authToken = AuthToken.Empty;
@@ -27,19 +28,46 @@ public sealed class BxHttpClient
         _apiServer = Constants.BxApiServers[apiServer];
     }
 
-    public BxHttpClient(string publicKey, string privateKey, BxApiServer apiServer = BxApiServer.Production, bool autoLogin = false)
+    public BxHttpClient(string publicKey, string privateKey, string metaData = "", AuthMode authMode = AuthMode.Hmac, BxApiServer apiServer = BxApiServer.Production, bool autoLogin = false)
     {
-        _publicKey = !string.IsNullOrWhiteSpace(publicKey) ? publicKey : throw new Exception("Public key cannot be empty.");
-        _privateKey = !string.IsNullOrWhiteSpace(privateKey) ? privateKey : throw new Exception("Private key cannot be empty.");
+        ArgumentException.ThrowIfNullOrWhiteSpace(publicKey, nameof(publicKey));
+        ArgumentException.ThrowIfNullOrWhiteSpace(privateKey, nameof(privateKey));
 
-        _authMode = publicKey[..4].ToUpperInvariant() switch
-        {
-            "HMAC" => AuthMode.Hmac,
-            _ => throw new ArgumentException("Public key type is not supported.")
-        };
-
+        _publicKey = publicKey;
+        _privateKey = privateKey;
         _apiServer = Constants.BxApiServers[apiServer];
         _autoLogin = autoLogin;
+        _authMode = authMode;
+
+        switch (authMode)
+        {
+            case AuthMode.Hmac:
+            {
+                if (!publicKey.StartsWith("HMAC"))
+                    throw new Exception("Invalid HMAC Public Key");
+                break;
+            }
+            case AuthMode.Ecdsa:
+            {
+                ArgumentException.ThrowIfNullOrWhiteSpace(metaData, nameof(metaData));
+
+                var metaDataJson = Encoding.UTF8.GetString(Convert.FromBase64String(metaData));
+
+                _metaData = Extensions.Deserialize<Metadata>(metaDataJson) ??
+                            throw new ArgumentException("Metadata is invalid", nameof(metaData));
+
+                // TODO: Wrap the ECDSA & HMAC Auth and Signer in a class
+                using var publicKeyEcdsa = ECDsa.Create();
+                publicKeyEcdsa.ImportFromPem(publicKey);
+
+                using var privateKeyEcdsa = ECDsa.Create();
+                privateKeyEcdsa.ImportFromPem(privateKey);
+
+                break;
+            }
+            default:
+                throw new ArgumentOutOfRangeException(nameof(authMode), authMode, "Invalid Authentication Mode");
+        }
     }
 
     internal async Task<decimal> FormatValue(PrecisionType type, string symbol, decimal value)
@@ -93,6 +121,49 @@ public sealed class BxHttpClient
         return await ProcessResponse<Login>(response);
     }
 
+    private async Task<BxHttpResponse<Login>> LoginEcdsa()
+    {
+        var bxPath = new EndpointPathBuilder(BxApiEndpoint.LoginEcdsa)
+            .Build();
+
+        var url = $"{_apiServer}{bxPath.Path}";
+
+        var httpClient = new HttpClient();
+
+        var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        var expirationTime = timestamp + 300;
+
+        var loginPayload = new
+        {
+            UserId = _metaData.UserId,
+            Nonce = timestamp,
+            ExpirationTime = expirationTime,
+            BiometricsUsed = false,
+            SessionKey = (string)null!,
+        };
+
+        var loginPayloadJson = Extensions.Serialize(loginPayload);
+
+        var ecdsa = ECDsa.Create();
+        ecdsa.ImportFromPem(_privateKey);
+
+        var signature = ecdsa.SignData(Encoding.UTF8.GetBytes(loginPayloadJson), HashAlgorithmName.SHA256, DSASignatureFormat.Rfc3279DerSequence);
+        var signatureBase64 = Convert.ToBase64String(signature);
+
+        var body = new
+        {
+            publicKey = _publicKey,
+            signature = signatureBase64,
+            loginPayload,
+        };
+
+        var bodyJson = Extensions.Serialize(body);
+
+        var response = await httpClient.PostAsync(url, new StringContent(bodyJson, new MediaTypeHeaderValue("application/json")));
+
+        return await ProcessResponse<Login>(response);
+    }
+
     /// <summary>
     /// The API uses bearer based authentication. A JWT token is valid for 24 hours only.
     /// Sessions are currently tracked per user, and each user is allowed to create a maximum of 500 concurrent sessions.
@@ -104,10 +175,14 @@ public sealed class BxHttpClient
     {
         await UpdateNonce();
 
+        // If we have an existing session, make sure it is logged out
+        if (!_authToken.IsEmpty)
+            await Logout();
+
         var loginResponse = _authMode switch
         {
             AuthMode.Hmac => await LoginHmac(),
-            AuthMode.Ecdsa => throw new NotImplementedException("ECDSA Authentication is coming soon"),
+            AuthMode.Ecdsa => await LoginEcdsa(),
             _ => throw new ArgumentException("Invalid authentication mode")
         };
 
@@ -128,7 +203,8 @@ public sealed class BxHttpClient
         var bxPath = new EndpointPathBuilder(BxApiEndpoint.Logout)
             .Build();
 
-        var logoutResponse = await Get<Empty>(bxPath);
+        // Logout, but make sure we don't autologin again
+        var logoutResponse = await Get<Empty>(bxPath, ignoreAutoLogin: true);
 
         if (logoutResponse.IsSuccess)
         {
@@ -164,9 +240,7 @@ public sealed class BxHttpClient
 
         var bodyJson = Extensions.Serialize(command);
 
-        var signature = path.Path.Contains("/v2/") ? 
-            SignV2(timestamp, nonce, "POST", $"/trading-api{path.Path}", bodyJson, _privateKey, _authMode) : 
-            Sign(bodyJson, _privateKey, _authMode);
+        var signature = path.Path.Contains("/v2/") ? SignV2(timestamp, nonce, "POST", $"/trading-api{path.Path}", bodyJson, _privateKey, _authMode) : Sign(bodyJson, _privateKey, _authMode);
 
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _authToken.Jwt);
         httpClient.DefaultRequestHeaders.Add("BX-SIGNATURE", signature);
@@ -225,7 +299,7 @@ public sealed class BxHttpClient
         return await ProcessResponse<TResult>(response, path.UsePagination);
     }
 
-    internal async Task<BxHttpResponse<TResult>> Get<TResult>(EndpointPath path) where TResult : notnull, new()
+    internal async Task<BxHttpResponse<TResult>> Get<TResult>(EndpointPath path, bool ignoreAutoLogin = false) where TResult : notnull, new()
     {
         var url = $"{_apiServer}{path.Path}";
 
@@ -235,7 +309,7 @@ public sealed class BxHttpClient
         {
             if (!_authToken.IsValid)
             {
-                if (_autoLogin)
+                if (_autoLogin && !ignoreAutoLogin)
                     await Login();
                 else
                     throw new Exception("No valid JWT was found. Please login.");
@@ -333,6 +407,15 @@ public sealed class BxHttpClient
                 var hmacDigest = hmacSha256.ComputeHash(Encoding.UTF8.GetBytes(hexSha));
 
                 return Convert.ToHexString(hmacDigest).ToLowerInvariant();
+            }
+            case AuthMode.Ecdsa:
+            {
+                var ecdsa = ECDsa.Create();
+                ecdsa.ImportFromPem(privateKey);
+                
+                var signature = ecdsa.SignData(Encoding.UTF8.GetBytes(message), HashAlgorithmName.SHA256, DSASignatureFormat.Rfc3279DerSequence);
+                return Convert.ToBase64String(signature);
+                
             }
             default:
                 throw new Exception("Invalid AuthMode for signing.");
