@@ -56,6 +56,7 @@ public sealed class BxHttpClient
                 _metaData = Extensions.Deserialize<Metadata>(metaDataJson) ??
                             throw new ArgumentException("Metadata is invalid", nameof(metaData));
 
+                // TODO: Wrap the ECDSA & HMAC Auth and Signer in a class
                 using var publicKeyEcdsa = ECDsa.Create();
                 publicKeyEcdsa.ImportFromPem(publicKey);
 
@@ -140,7 +141,7 @@ public sealed class BxHttpClient
             BiometricsUsed = false,
             SessionKey = (string)null!,
         };
-         
+
         var loginPayloadJson = Extensions.Serialize(loginPayload);
 
         var ecdsa = ECDsa.Create();
@@ -148,7 +149,7 @@ public sealed class BxHttpClient
 
         var signature = ecdsa.SignData(Encoding.UTF8.GetBytes(loginPayloadJson), HashAlgorithmName.SHA256, DSASignatureFormat.Rfc3279DerSequence);
         var signatureBase64 = Convert.ToBase64String(signature);
-        
+
         var body = new
         {
             publicKey = _publicKey,
@@ -157,7 +158,7 @@ public sealed class BxHttpClient
         };
 
         var bodyJson = Extensions.Serialize(body);
-        
+
         var response = await httpClient.PostAsync(url, new StringContent(bodyJson, new MediaTypeHeaderValue("application/json")));
 
         return await ProcessResponse<Login>(response);
@@ -173,6 +174,10 @@ public sealed class BxHttpClient
     public async Task<BxHttpResponse<Login>> Login(bool storeResult = true)
     {
         await UpdateNonce();
+
+        // If we have an existing session, make sure it is logged out
+        if (!_authToken.IsEmpty)
+            await Logout();
 
         var loginResponse = _authMode switch
         {
@@ -198,7 +203,8 @@ public sealed class BxHttpClient
         var bxPath = new EndpointPathBuilder(BxApiEndpoint.Logout)
             .Build();
 
-        var logoutResponse = await Get<Empty>(bxPath);
+        // Logout, but make sure we don't autologin again
+        var logoutResponse = await Get<Empty>(bxPath, ignoreAutoLogin: true);
 
         if (logoutResponse.IsSuccess)
         {
@@ -234,9 +240,7 @@ public sealed class BxHttpClient
 
         var bodyJson = Extensions.Serialize(command);
 
-        var signature = path.Path.Contains("/v2/") ? 
-            SignV2(timestamp, nonce, "POST", $"/trading-api{path.Path}", bodyJson, _privateKey, _authMode) : 
-            Sign(bodyJson, _privateKey, _authMode);
+        var signature = path.Path.Contains("/v2/") ? SignV2(timestamp, nonce, "POST", $"/trading-api{path.Path}", bodyJson, _privateKey, _authMode) : Sign(bodyJson, _privateKey, _authMode);
 
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _authToken.Jwt);
         httpClient.DefaultRequestHeaders.Add("BX-SIGNATURE", signature);
@@ -295,7 +299,7 @@ public sealed class BxHttpClient
         return await ProcessResponse<TResult>(response, path.UsePagination);
     }
 
-    internal async Task<BxHttpResponse<TResult>> Get<TResult>(EndpointPath path) where TResult : notnull, new()
+    internal async Task<BxHttpResponse<TResult>> Get<TResult>(EndpointPath path, bool ignoreAutoLogin = false) where TResult : notnull, new()
     {
         var url = $"{_apiServer}{path.Path}";
 
@@ -305,7 +309,7 @@ public sealed class BxHttpClient
         {
             if (!_authToken.IsValid)
             {
-                if (_autoLogin)
+                if (_autoLogin && !ignoreAutoLogin)
                     await Login();
                 else
                     throw new Exception("No valid JWT was found. Please login.");
