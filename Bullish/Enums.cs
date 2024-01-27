@@ -76,6 +76,7 @@ internal enum BxApiEndpoint
 {
     Login,
     LoginHmac,
+    LoginEcdsa,
     Logout,
     Nonce,
     Time,
