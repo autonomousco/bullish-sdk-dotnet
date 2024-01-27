@@ -12,7 +12,7 @@ public static partial class Resources
     /// <param name="orderId">Unique order ID</param>
     /// <param name="pageSize">The number of candles to return 5, 25, 50, 100, default value is 25</param>
     /// <param name="pageLink">Get the results for the next or previous page</param>
-    public static Task<BxHttpResponse<List<Trade>>> GetTrades(this BxHttpClient httpClient, string symbol, string orderId = "", int pageSize = 25, BxPageLinks.PageLink? pageLink = null)
+    public static async Task<BxHttpResponse<List<Trade>>> GetTrades(this BxHttpClient httpClient, string symbol, string orderId = "", int pageSize = 25, BxPageLinks.PageLink? pageLink = null)
     {
         // TODO: Add date filters
         var bxPath = new EndpointPathBuilder(BxApiEndpoint.Trades)
@@ -21,19 +21,19 @@ public static partial class Resources
             .AddPagination(pageSize, useMetaData: true)
             .AddPageLink(pageLink ?? BxPageLinks.PageLink.Empty)
             .Build();
-
-        return httpClient.Get<List<Trade>>(bxPath);
+        
+        return await httpClient.Get<List<Trade>>(bxPath);
     }
-
+    
     /// <summary>
     /// Gets a trade by ID
     /// </summary>
     /// <param name="tradeId">The trade ID</param>
-    public static Task<BxHttpResponse<Trade>> GetTrade(this BxHttpClient httpClient, string tradeId)
+    public static async Task<BxHttpResponse<Trade>> GetTrade(this BxHttpClient httpClient, string tradeId)
     {
         var bxPath = new EndpointPathBuilder(BxApiEndpoint.TradesTradeId)
             .AddResourceId(tradeId)
             .Build();
-        return httpClient.Get<Trade>(bxPath);
+        return await httpClient.Get<Trade>(bxPath);
     }
 }

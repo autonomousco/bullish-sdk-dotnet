@@ -9,6 +9,4 @@ internal sealed record AuthToken(string Jwt, DateTime Expiration)
     public static AuthToken Empty => new();
     
     public bool IsValid => DateTime.UtcNow < Expiration;
-
-    public bool IsEmpty => string.IsNullOrWhiteSpace(Jwt);
 }

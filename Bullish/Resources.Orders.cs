@@ -15,7 +15,7 @@ public static partial class Resources
     /// <param name="orderStatus">Order status</param>
     /// <param name="pageSize">The number of candles to return 5, 25, 50, 100, default value is 25</param>
     /// <param name="pageLink">Get the results for the next or previous page</param>
-    public static Task<BxHttpResponse<List<Order>>> GetOrders(this BxHttpClient httpClient, string symbol = "", string handle = "", OrderSide orderSide = OrderSide.None, OrderStatus orderStatus = OrderStatus.None, int pageSize = 25, BxPageLinks.PageLink? pageLink = null)
+    public static async Task<BxHttpResponse<List<Order>>> GetOrders(this BxHttpClient httpClient, string symbol = "", string handle = "", OrderSide orderSide = OrderSide.None, OrderStatus orderStatus = OrderStatus.None, int pageSize = 25, BxPageLinks.PageLink? pageLink = null)
     {
         var bxPath = new EndpointPathBuilder(BxApiEndpoint.Orders)
             .AddQueryParam("symbol", symbol)
@@ -26,7 +26,7 @@ public static partial class Resources
             .AddPageLink(pageLink ?? BxPageLinks.PageLink.Empty)
             .Build();
 
-        return httpClient.Get<List<Order>>(bxPath);
+        return await httpClient.Get<List<Order>>(bxPath);
     }
 
     /// <summary>
@@ -34,14 +34,14 @@ public static partial class Resources
     /// </summary>
     /// <param name="orderId">The order ID</param>
     /// <param name="tradingAccountId"></param>
-    public static Task<BxHttpResponse<Order>> GetOrder(this BxHttpClient httpClient, string orderId, string tradingAccountId)
+    public static async Task<BxHttpResponse<Order>> GetOrder(this BxHttpClient httpClient, string orderId, string tradingAccountId)
     {
         var bxPath = new EndpointPathBuilder(BxApiEndpoint.OrdersOrderId)
             .AddResourceId(orderId)
             .AddQueryParam("tradingAccountId", tradingAccountId)
             .Build();
 
-        return httpClient.Get<Order>(bxPath);
+        return await httpClient.Get<Order>(bxPath);
     }
 
     public static async Task<BxHttpResponse<CreateOrder>> CreateOrder(this BxHttpClient httpClient, string tradingAccountId, string symbol, OrderType type, OrderSide side, decimal quantity, decimal price = 0M, decimal stopPrice = 0M, OrderTimeInForce timeInForce = OrderTimeInForce.None, string clientOrderId = "", bool allowBorrow = false)
@@ -57,7 +57,7 @@ public static partial class Resources
         var command = new CreateOrderCommand("V3CreateOrder",
             ClientOrderId: string.IsNullOrWhiteSpace(clientOrderId) ? null : clientOrderId,
             Symbol: symbol,
-            Type: type.ToString().ToUpperInvariant(),
+            Type: type.ToString().ToUpperInvariant(), 
             Side: side.ToString().ToUpperInvariant(),
             Price: price == 0 ? null : priceNormalized.ToString(CultureInfo.InvariantCulture),
             StopPrice: stopPrice == 0 ? null : stopPriceNormalized.ToString(CultureInfo.InvariantCulture),
@@ -69,30 +69,30 @@ public static partial class Resources
         return await httpClient.Post<CreateOrder, CreateOrderCommand>(bxPath, command);
     }
 
-    public static Task<BxHttpResponse<CancelAllOrders>> CancelAllOpenOrders(this BxHttpClient httpClient, string tradingAccountId)
+    public static async Task<BxHttpResponse<CancelAllOrders>> CancelAllOpenOrders(this BxHttpClient httpClient, string tradingAccountId)
     {
         var bxPath = new EndpointPathBuilder(BxApiEndpoint.Command)
             .Build();
 
-        var command = new CancelAllOrdersCommand("V1CancelAllOrders",
+        var command = new CancelAllOrdersCommand("V1CancelAllOrders", 
             TradingAccountId: tradingAccountId);
 
-        return httpClient.Post<CancelAllOrders, CancelAllOrdersCommand>(bxPath, command);
+        return await httpClient.Post<CancelAllOrders, CancelAllOrdersCommand>(bxPath, command);
     }
 
-    public static Task<BxHttpResponse<CancelAllOrders>> CancelAllOpenOrdersByMarket(this BxHttpClient httpClient, string tradingAccountId, string symbol)
+    public static async Task<BxHttpResponse<CancelAllOrders>> CancelAllOpenOrdersByMarket(this BxHttpClient httpClient, string tradingAccountId, string symbol)
     {
         var bxPath = new EndpointPathBuilder(BxApiEndpoint.Command)
             .Build();
 
-        var command = new CancelAllOrdersByMarketCommand("V1CancelAllOrdersByMarket",
-            Symbol: symbol,
+        var command = new CancelAllOrdersByMarketCommand("V1CancelAllOrdersByMarket", 
+            Symbol: symbol, 
             TradingAccountId: tradingAccountId);
 
-        return httpClient.Post<CancelAllOrders, CancelAllOrdersByMarketCommand>(bxPath, command);
+        return await httpClient.Post<CancelAllOrders, CancelAllOrdersByMarketCommand>(bxPath, command);
     }
 
-    public static Task<BxHttpResponse<CancelOrder>> CancelOrder(this BxHttpClient httpClient, string tradingAccountId, string symbol, string orderId = "", string clientOrderId = "")
+    public static async Task<BxHttpResponse<CancelOrder>> CancelOrder(this BxHttpClient httpClient, string tradingAccountId, string symbol, string orderId = "", string clientOrderId = "")
     {
         var bxPath = new EndpointPathBuilder(BxApiEndpoint.Command)
             .Build();
@@ -103,7 +103,7 @@ public static partial class Resources
             Symbol: symbol,
             TradingAccountId: tradingAccountId);
 
-        return httpClient.Post<CancelOrder, CancelOrderCommand>(bxPath, command);
+        return await httpClient.Post<CancelOrder, CancelOrderCommand>(bxPath, command);
     }
 
     // TODO: Cancel All Open Limit Orders after Delay

@@ -8,24 +8,24 @@ public static partial class Resources
     /// <summary>
     /// Get supported assets
     /// </summary>
-    public static Task<BxHttpResponse<List<Asset>>> GetAssets(this BxHttpClient httpClient)
+    public static async Task<BxHttpResponse<List<Asset>>> GetAssets(this BxHttpClient httpClient)
     {
         var bxPath = new EndpointPathBuilder(BxApiEndpoint.Assets)
             .Build();
-
-        return httpClient.Get<List<Asset>>(bxPath);
+        
+        return await httpClient.Get<List<Asset>>(bxPath);
     }
 
     /// <summary>
     /// Get asset by symbol
     /// </summary>
     /// <param name="symbol">For example "BTC"</param>
-    public static Task<BxHttpResponse<Asset>> GetAsset(this BxHttpClient httpClient, string symbol)
+    public static async Task<BxHttpResponse<Asset>> GetAsset(this BxHttpClient httpClient, string symbol)
     {
         var bxPath = new EndpointPathBuilder(BxApiEndpoint.AssetsSymbol)
             .AddResourceId(symbol)
             .Build();
-
-        return httpClient.Get<Asset>(bxPath);
+        
+        return await httpClient.Get<Asset>(bxPath);
     }
 }

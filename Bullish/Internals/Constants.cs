@@ -2,7 +2,7 @@ namespace Bullish.Internals;
 
 internal static class Constants
 {
-    public static readonly Dictionary<BxApiServer, string> BxApiServers = new()
+    public static Dictionary<BxApiServer, string> BxApiServers = new()
     {
         { BxApiServer.Production, "https://api.exchange.bullish.com/trading-api" },
         { BxApiServer.ProductionRegistered, "https://registered.api.exchange.bullish.com/trading-api" },
@@ -11,10 +11,9 @@ internal static class Constants
         { BxApiServer.SandboxRegistered, "https://registered.api.simnext.bullish-test.com/trading-api" },
     };
 
-    public static readonly Dictionary<BxApiEndpoint, Endpoint> BxApiEndpoints = new()
+    public static Dictionary<BxApiEndpoint, Endpoint> BxApiEndpoints = new()
     {
         // { BxApiEndpoint.Login, new Endpoint("/users/login", "/v2", false) }, // Old EOS style authentication, deprecated March 2024
-        { BxApiEndpoint.LoginEcdsa, new Endpoint("/users/login", "/v2", false) },
         { BxApiEndpoint.LoginHmac, new Endpoint("/users/hmac/login", "/v1", false) },
         { BxApiEndpoint.Logout, new Endpoint("/users/logout", "/v1", true) },
         { BxApiEndpoint.Nonce, new Endpoint("/nonce", "/v1", false) },

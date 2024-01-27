@@ -8,25 +8,25 @@ public static partial class Resources
     /// <summary>
     /// Get Markets
     /// </summary>
-    public static Task<BxHttpResponse<List<Market>>> GetMarkets(this BxHttpClient httpClient)
+    public static async Task<BxHttpResponse<List<Market>>> GetMarkets(this BxHttpClient httpClient)
     {
         var bxPath = new EndpointPathBuilder(BxApiEndpoint.Markets)
             .Build();
-
-        return httpClient.Get<List<Market>>(bxPath);
+        
+        return await httpClient.Get<List<Market>>(bxPath);
     }
 
     /// <summary>
     /// Get Market by Symbol
     /// </summary>
     /// <param name="symbol">Symbol to get</param>
-    public static Task<BxHttpResponse<Market>> GetMarket(this BxHttpClient httpClient, string symbol)
+    public static async Task<BxHttpResponse<Market>> GetMarket(this BxHttpClient httpClient, string symbol)
     {
         var bxPath = new EndpointPathBuilder(BxApiEndpoint.MarketsSymbol)
             .AddResourceId(symbol)
             .Build();
-
-        return httpClient.Get<Market>(bxPath);
+        
+        return await httpClient.Get<Market>(bxPath);
     }
 
     /// <summary>
@@ -34,42 +34,42 @@ public static partial class Resources
     /// </summary>
     /// <param name="symbol">Symbol to get</param>
     /// <param name="depth">Controls the number of bids/asks returned from the mid price</param>
-    public static Task<BxHttpResponse<OrderBook>> GetMarketOrderBook(this BxHttpClient httpClient, string symbol, int depth = 10)
+    public static async Task<BxHttpResponse<OrderBook>> GetMarketOrderBook(this BxHttpClient httpClient, string symbol, int depth = 10)
     {
         var bxPath = new EndpointPathBuilder(BxApiEndpoint.MarketsSymbolOrderBookHybrid)
-            .AddResourceId(symbol)
-            .AddQueryParam("depth", depth)
-            .Build();
-
-        return httpClient.Get<OrderBook>(bxPath);
+                .AddResourceId(symbol)
+                .AddQueryParam("depth", depth)
+                .Build();
+        
+        return await httpClient.Get<OrderBook>(bxPath);
     }
-
+    
     /// <summary>
     /// Get Market Trades by Market Symbol.
     /// Return 100 most recent trades. Lookup from local cache.
     /// </summary>
     /// <param name="symbol">Symbol to get</param>
-    public static Task<BxHttpResponse<List<MarketTrade>>> GetMarketTrades(this BxHttpClient httpClient, string symbol)
+    public static async Task<BxHttpResponse<List<MarketTrade>>> GetMarketTrades(this BxHttpClient httpClient, string symbol)
     {
         var bxPath = new EndpointPathBuilder(BxApiEndpoint.MarketsSymbolTrades)
             .AddResourceId(symbol)
             .Build();
-
-        return httpClient.Get<List<MarketTrade>>(bxPath);
+        
+        return await httpClient.Get<List<MarketTrade>>(bxPath);
     }
-
+    
     /// <summary>
     /// Get Current Tick by Market Symbol.
     /// Return top 100.
     /// </summary>
     /// <param name="symbol">Symbol to get</param>
-    public static Task<BxHttpResponse<Tick>> GetMarketTick(this BxHttpClient httpClient, string symbol)
+    public static async Task<BxHttpResponse<Tick>> GetMarketTick(this BxHttpClient httpClient, string symbol)
     {
         var bxPath = new EndpointPathBuilder(BxApiEndpoint.MarketsSymbolTick)
             .AddResourceId(symbol)
             .Build();
-
-        return httpClient.Get<Tick>(bxPath);
+        
+        return await httpClient.Get<Tick>(bxPath);
     }
 
     /// <summary>
@@ -81,7 +81,7 @@ public static partial class Resources
     /// <param name="toTimestamp">End timestamp of window</param>
     /// <param name="pageSize">The number of candles to return 5, 25, 50, 100, default value is 25</param>
     /// <param name="pageLink">Get the results for the next or previous page</param>
-    public static Task<BxHttpResponse<List<MarketCandle>>> GetMarketCandles(this BxHttpClient httpClient, string symbol, TimeBucket timeBucket, DateTime fromTimestamp, DateTime toTimestamp, int pageSize = 25, BxPageLinks.PageLink? pageLink = null)
+    public static async Task<BxHttpResponse<List<MarketCandle>>> GetMarketCandles(this BxHttpClient httpClient, string symbol, TimeBucket timeBucket, DateTime fromTimestamp, DateTime toTimestamp, int pageSize = 25, BxPageLinks.PageLink? pageLink = null)
     {
         var bxPath = new EndpointPathBuilder(BxApiEndpoint.MarketsSymbolCandle)
             .AddResourceId(symbol)
@@ -92,6 +92,6 @@ public static partial class Resources
             .AddPageLink(pageLink ?? BxPageLinks.PageLink.Empty)
             .Build();
 
-        return httpClient.Get<List<MarketCandle>>(bxPath);
+        return await httpClient.Get<List<MarketCandle>>(bxPath);
     }
 }
