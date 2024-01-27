@@ -40,6 +40,14 @@ var order = await bxHttpClient.GetOrder("1234567890", tradingAccount.TradingAcco
 ```
 
 ### Version History
+* Version 1.1.2 - Jan 27, 2024
+  * Added support for ECDSA login
+  * Updated NuGet package references
+  * Added order book and market trades tests
+  * Removed redundant async await modifiers from API calls
+  * Automatically logout if JWT session exists when logging in
+
+
 * Version 1.1.1 - Jan 8, 2024
   * Fixed AverageFillPrice null on rejected order throwing a deserialization exception
 
