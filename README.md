@@ -45,8 +45,11 @@ var order = await bxHttpClient.GetOrder("1234567890", tradingAccount.TradingAcco
 ```
 
 ## Version History
+#### Version 1.1.3 - Jan 27, 2024
+- Added ECDSA signing for trading commands
+---
 #### Version 1.1.2 - Jan 27, 2024
-- Added support for ECDSA login and trading
+- Added support for ECDSA login
 - Updated NuGet package references
 - Added order book and market trades tests
 - Removed redundant async await modifiers from API calls
