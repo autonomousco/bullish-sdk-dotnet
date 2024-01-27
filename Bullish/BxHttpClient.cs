@@ -408,6 +408,15 @@ public sealed class BxHttpClient
 
                 return Convert.ToHexString(hmacDigest).ToLowerInvariant();
             }
+            case AuthMode.Ecdsa:
+            {
+                var ecdsa = ECDsa.Create();
+                ecdsa.ImportFromPem(privateKey);
+                
+                var signature = ecdsa.SignData(Encoding.UTF8.GetBytes(message), HashAlgorithmName.SHA256, DSASignatureFormat.Rfc3279DerSequence);
+                return Convert.ToBase64String(signature);
+                
+            }
             default:
                 throw new Exception("Invalid AuthMode for signing.");
         }
