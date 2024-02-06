@@ -45,6 +45,12 @@ var order = await bxHttpClient.GetOrder("1234567890", tradingAccount.TradingAcco
 ```
 
 ## Version History
+#### Version 1.1.4 - Feb 6, 2024
+- Removed legacy BxNonce code to fix invalid nonce error
+- Exposed Time and Nonce GET requests
+- Added custom JsonConverter for bool data types sent as strings
+- Added HMAC and ECDSA credential config via appsettings.json for authenticated integration tests
+---
 #### Version 1.1.3 - Jan 27, 2024
 - Added ECDSA signing for trading commands
 ---
