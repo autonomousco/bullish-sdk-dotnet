@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Bullish.Internals;
 
 namespace Bullish;
 
@@ -78,6 +79,7 @@ internal static class Extensions
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             NumberHandling = JsonNumberHandling.AllowReadingFromString,
             WriteIndented = writeIndented,
+            Converters = { new JsonConverters.BoolConverter() },
         };
 
         jsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
