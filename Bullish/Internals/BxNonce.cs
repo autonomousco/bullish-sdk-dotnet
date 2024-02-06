@@ -1,13 +1,14 @@
 namespace Bullish.Internals;
 
-internal sealed record Nonce
+[Obsolete("No longer used internally. Awaiting upgrade to thread safe stateful nonce.")]
+internal sealed record BxNonce
 {
     public long LowerBound { get; init; }
     public long UpperBound { get; init; }
 
     public long Value { get; private set; } = -1;
 
-    public static Nonce Empty => new()
+    public static BxNonce Empty => new()
     {
         UpperBound = 0,
         LowerBound = 0,

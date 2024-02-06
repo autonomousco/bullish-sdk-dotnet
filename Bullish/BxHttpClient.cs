@@ -1,9 +1,12 @@
 using System.Net.Http.Headers;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json.Nodes;
 using Bullish.Internals;
 using Bullish.Schemas;
+
+[assembly: InternalsVisibleTo("Bullish.Tests")]
 
 namespace Bullish;
 
@@ -17,7 +20,6 @@ public sealed class BxHttpClient
     private readonly string _privateKey = string.Empty;
     private readonly Metadata _metaData = Metadata.Empty;
 
-    private Nonce _nonce = Nonce.Empty;
     private AuthToken _authToken = AuthToken.Empty;
     private string _authorizer = string.Empty;
 
@@ -101,7 +103,7 @@ public sealed class BxHttpClient
 
         var httpClient = new HttpClient();
 
-        var nonce = $"{_nonce.NextValue()}";
+        var nonce = $"{DateTime.UtcNow.ToUnixTimeMicroseconds()}";
         var timestamp = $"{DateTime.UtcNow.ToUnixTimeMilliseconds()}";
 
         var message = $"{timestamp}{nonce}GET/trading-api/v1/users/hmac/login";
@@ -170,11 +172,9 @@ public sealed class BxHttpClient
     /// If a user exceeds this limit, an error (MAX_SESSION_COUNT_REACHED) is returned on the subsequent login requests.
     /// In order to free up unused sessions, users must logout.
     /// </summary>
-    /// <param name="storeResult">Store the resulting JWT and Nonce in the BxHttpClient instance?</param>
+    /// <param name="storeResult">Store the resulting JWT in the BxHttpClient instance</param>
     public async Task<BxHttpResponse<Login>> Login(bool storeResult = true)
     {
-        await UpdateNonce();
-
         // If we have an existing session, make sure it is logged out
         if (!_authToken.IsEmpty)
             await Logout();
@@ -208,7 +208,6 @@ public sealed class BxHttpClient
 
         if (logoutResponse.IsSuccess)
         {
-            _nonce = Nonce.Empty;
             _authToken = AuthToken.Empty;
             _authorizer = string.Empty;
             // _ownerAuthorizer = string.Empty;
@@ -236,7 +235,7 @@ public sealed class BxHttpClient
         }
 
         var timestamp = $"{DateTime.UtcNow.ToUnixTimeMilliseconds()}";
-        var nonce = $"{_nonce.NextValue()}";
+        var nonce = $"{DateTime.UtcNow.ToUnixTimeMicroseconds()}";
 
         var bodyJson = Extensions.Serialize(command);
 
@@ -277,7 +276,7 @@ public sealed class BxHttpClient
         var commandBody = new
         {
             Timestamp = $"{DateTime.UtcNow.ToUnixTimeMilliseconds()}",
-            Nonce = $"{_nonce.NextValue()}",
+            Nonce = $"{DateTime.UtcNow.ToUnixTimeMicroseconds()}",
             Authorizer = _authorizer,
             Command = command,
         };
@@ -305,18 +304,15 @@ public sealed class BxHttpClient
 
         var httpClient = new HttpClient();
 
-        if (path.UseAuth)
+        if (path.UseAuth && !ignoreAutoLogin)
         {
             if (!_authToken.IsValid)
             {
-                if (_autoLogin && !ignoreAutoLogin)
+                if (_autoLogin)
                     await Login();
                 else
                     throw new Exception("No valid JWT was found. Please login.");
             }
-
-            if (!_nonce.IsValid())
-                throw new Exception("No valid Nonce was found. Please login.");
 
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _authToken.Jwt);
         }
@@ -412,10 +408,9 @@ public sealed class BxHttpClient
             {
                 var ecdsa = ECDsa.Create();
                 ecdsa.ImportFromPem(privateKey);
-                
+
                 var signature = ecdsa.SignData(Encoding.UTF8.GetBytes(message), HashAlgorithmName.SHA256, DSASignatureFormat.Rfc3279DerSequence);
                 return Convert.ToBase64String(signature);
-                
             }
             default:
                 throw new Exception("Invalid AuthMode for signing.");
@@ -430,19 +425,5 @@ public sealed class BxHttpClient
             throw new Exception($"Failed to get Markets. Reason:{marketsResponse.Error.Message}");
 
         _markets = marketsResponse.Result.ToDictionary(key => key.Symbol, value => value);
-    }
-
-    private async Task UpdateNonce()
-    {
-        // Configure the nonce
-        var nonceResponse = await this.GetNonce();
-
-        if (!nonceResponse.IsSuccess)
-            throw new Exception($"Failed to get Nonce. Reason:{nonceResponse.Error.Message}");
-
-        if (!nonceResponse.Result.IsValid())
-            throw new Exception("Nonce from server was invalid.");
-
-        _nonce = nonceResponse.Result;
     }
 }

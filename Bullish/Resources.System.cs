@@ -3,7 +3,7 @@ using Bullish.Schemas;
 
 namespace Bullish;
 
-internal static class ResourcesInternal
+public static partial class Resources
 {
     /// <summary>
     /// Get the current nonce range.
