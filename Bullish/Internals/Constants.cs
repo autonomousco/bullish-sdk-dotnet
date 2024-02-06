@@ -45,13 +45,5 @@ internal static class Constants
         { BxApiEndpoint.MarketsSymbolTick, new Endpoint("/markets/{symbol}/tick", "/v1", false) },
         { BxApiEndpoint.MarketsSymbolCandle, new Endpoint("/markets/{symbol}/candle", "/v1", false) },
         { BxApiEndpoint.Command, new Endpoint("/command", "/v2", true) },
-        // TODO: 
-        // V3CancelOrder
-        // V1CancelAllOrders
-        // V1CancelAllOrdersByMarket
-        // V1DelayedCancelAllOrders
-        // V1UnsetDelayedCancelAllOrders
-        // V3TerminateAMMInstruction
-        // V2TransferAsset
     };
 }
