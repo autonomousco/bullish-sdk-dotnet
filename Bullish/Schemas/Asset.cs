@@ -10,4 +10,6 @@ public record Asset
     public decimal Apr { get; init; }
     public decimal CollateralRating { get; init; }
     public decimal MaxBorrow { get; init; }
+    public decimal TotalOfferedLoanQuantity { get; init; }
+    public decimal LoanBorrowedQuantity { get; init; }
 }

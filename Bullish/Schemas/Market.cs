@@ -6,6 +6,8 @@ public record Market
     public string Symbol { get; init; } = string.Empty;
     public string BaseSymbol { get; init; } = string.Empty;
     public string QuoteSymbol { get; init; } = string.Empty;
+    public string UnderlyingBaseSymbol { get; init; } = string.Empty;
+    public string UnderlyingQuoteSymbol { get; init; } = string.Empty;
     public string QuoteAssetId { get; init; } = string.Empty;
     public string BaseAssetId { get; init; } = string.Empty;
     public int QuotePrecision { get; init; }
@@ -25,11 +27,19 @@ public record Market
     public int LiquidityPrecision { get; init; }
     public int MakerFee { get; init; }
     public int TakerFee { get; init; }
-    public List<string> OrderTypes { get; init; } = new();
+    public List<string> OrderTypes { get; init; } = [];
     public bool SpotTradingEnabled { get; init; }
     public bool MarginTradingEnabled { get; init; }
     public bool MarketEnabled { get; init; }
     public bool CreateOrderEnabled { get; init; }
     public bool CancelOrderEnabled { get; init; }
-    public List<FeeTier> FeeTiers { get; init; } = new();
+    public List<FeeTier> FeeTiers { get; init; } = [];
+    public MarketType MarketType { get; init; }
+    public string ContractMultiplier { get; init; } = string.Empty;
+    public string SettlementAssetSymbol { get; init; } = string.Empty;
+    public decimal? MaxInitialLeverage { get; init; }
+    public decimal? WarningLeverage { get; init; }
+    public decimal? LiquidationLeverage { get; init; }
+    public decimal? FullLiquidationLeverage { get; init; }
+    public decimal? DefaultedLeverage { get; init; }
 }

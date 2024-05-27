@@ -28,10 +28,11 @@ public static partial class Resources
     /// Gets a specific AMM instruction based on the liquidityId.
     /// </summary>
     /// <param name="instructionId">Unique AMM instruction ID</param>
-    public static Task<BxHttpResponse<AmmInstruction>> GetAmmInstruction(this BxHttpClient httpClient, string instructionId)
+    public static Task<BxHttpResponse<AmmInstruction>> GetAmmInstruction(this BxHttpClient httpClient, string instructionId, string tradingAccountId)
     {
         var bxPath = new EndpointPathBuilder(BxApiEndpoint.AmmInstructionsLiquidityId)
-            .AddQueryParam("liquidityId", instructionId)
+            .AddResourceId(instructionId)
+            .AddQueryParam("tradingAccountId", tradingAccountId)
             .Build();
 
         return httpClient.Get<AmmInstruction>(bxPath);

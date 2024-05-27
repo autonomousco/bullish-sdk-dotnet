@@ -20,8 +20,13 @@ public record Tick
     public decimal BaseVolume { get; init; }
     public decimal QuoteVolume { get; init; }
     public decimal BancorPrice { get; init; }
+    public decimal? MarkPrice {get; init; }
+    public decimal? FundingRate {get; init; }
+    public decimal? OpenInterest {get; init; }
     public DateTime LastTradeDatetime { get; init; }
     public string LastTradeTimestamp { get; init; } = string.Empty;
     public decimal LastTradeQuantity { get; init; }
     public List<AmmData> AmmData { get; init; } = new();
 }
+
+

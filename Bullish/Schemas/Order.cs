@@ -13,6 +13,7 @@ public record Order
     public decimal QuantityFilled { get; init; }
     public decimal BaseFee { get; init; }
     public decimal QuoteFee { get; init; }
+    public decimal QuoteAmount { get; init; }
     public decimal? BorrowedBaseQuantity { get; init; }
     public decimal? BorrowedQuoteQuantity { get; init; }
     public bool IsLiquidation { get; init; }

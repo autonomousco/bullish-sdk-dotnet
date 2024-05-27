@@ -25,7 +25,7 @@ internal static class Constants
         { BxApiEndpoint.Orders, new Endpoint("/orders", "/v2", true) },
         { BxApiEndpoint.OrdersOrderId, new Endpoint("/orders/{orderId}", "/v2", true) },
         { BxApiEndpoint.AmmInstructions, new Endpoint("/amm-instructions", "/v2", true) },
-        { BxApiEndpoint.AmmInstructionsLiquidityId, new Endpoint("/amm-instructions/{instructionid}", "/v1", true) },
+        { BxApiEndpoint.AmmInstructionsLiquidityId, new Endpoint("/amm-instructions/{instructionid}", "/v2", true) },
         { BxApiEndpoint.WalletsTransactions, new Endpoint("/wallets/transactions", "/v1", true) },
         { BxApiEndpoint.WalletsLimitsSymbol, new Endpoint("/wallets/limits/{symbol}", "/v1", true) },
         { BxApiEndpoint.WalletsDepositInstructionsCryptoSymbol, new Endpoint("/wallets/deposit-instructions/crypto/{symbol}", "/v1", true) },

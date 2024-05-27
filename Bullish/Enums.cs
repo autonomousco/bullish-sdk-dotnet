@@ -19,6 +19,7 @@ public enum OrderType
     Limit,
     Market,
     Stop_Limit,
+    Post_Only,
 }
 
 public enum OrderTimeInForce
@@ -34,6 +35,13 @@ public enum AmmInstructionStatus
     None,
     Open,
     Closed,
+}
+
+public enum MarketType
+{
+    None,
+    Spot,
+    Perpetual,
 }
 
 public enum OrderStatus

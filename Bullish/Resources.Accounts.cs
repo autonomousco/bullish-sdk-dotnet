@@ -43,4 +43,18 @@ public static partial class Resources
 
         return httpClient.Get<List<TradingAccount>>(bxPath);
     }
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="tradingAccountId"></param>
+    /// <returns></returns>
+    public static Task<BxHttpResponse<TradingAccount>> GetTradingAccount(this BxHttpClient httpClient, string tradingAccountId)
+    {
+        var bxPath = new EndpointPathBuilder(BxApiEndpoint.AccountsTradingAccounts)
+            .AddResourceId(tradingAccountId)
+            .Build();
+
+        return httpClient.Get<TradingAccount>(bxPath);
+    }
 }

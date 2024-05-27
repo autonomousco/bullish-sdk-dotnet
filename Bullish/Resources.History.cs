@@ -38,4 +38,7 @@ public static partial class Resources
 
         return httpClient.Get<List<BorrowInterest>>(bxPath);
     }
+    
+    // TODO: Add /history/transfer
+    // https://api.exchange.bullish.com/docs/api/rest/trading-api/v2/#get-/history/transfer
 }

@@ -9,6 +9,7 @@ public record Trade
     public decimal Quantity { get; init; }
     public decimal BaseFee { get; init; }
     public decimal QuoteFee { get; init; }
+    public decimal QuoteAmount { get; init; }
     public string Side { get; init; } = string.Empty;
     public bool IsTaker { get; init; }
     public DateTime CreatedAtDatetime { get; init; }
