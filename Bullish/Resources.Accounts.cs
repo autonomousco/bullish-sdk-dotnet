@@ -8,9 +8,10 @@ public static partial class Resources
     /// <summary>
     /// Gets the asset accounts.
     /// </summary>
-    public static Task<BxHttpResponse<List<AssetAccount>>> GetAssetAccounts(this BxHttpClient httpClient)
+    public static Task<BxHttpResponse<List<AssetAccount>>> GetAssetAccounts(this BxHttpClient httpClient, string tradingAccountId)
     {
         var bxPath = new EndpointPathBuilder(BxApiEndpoint.AccountsAsset)
+            .AddQueryParam("tradingAccountId", tradingAccountId)
             .Build();
 
         return httpClient.Get<List<AssetAccount>>(bxPath);
@@ -20,10 +21,12 @@ public static partial class Resources
     /// Gets the asset account by symbol.
     /// </summary>
     /// <param name="symbol">For example "BTC"</param>
-    public static Task<BxHttpResponse<AssetAccount>> GetAssetAccount(this BxHttpClient httpClient, string symbol)
+    /// <param name="tradingAccountId"></param>
+    public static Task<BxHttpResponse<AssetAccount>> GetAssetAccount(this BxHttpClient httpClient, string symbol, string tradingAccountId)
     {
         var bxPath = new EndpointPathBuilder(BxApiEndpoint.AccountsAssetSymbol)
             .AddResourceId(symbol)
+            .AddQueryParam("tradingAccountId", tradingAccountId)
             .Build();
 
         return httpClient.Get<AssetAccount>(bxPath);
