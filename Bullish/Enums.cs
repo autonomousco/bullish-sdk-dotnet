@@ -37,6 +37,14 @@ public enum AmmInstructionStatus
     Closed,
 }
 
+public enum TransferStatus
+{
+    None,
+    Open,
+    Closed,
+    Rejected,
+}
+
 public enum MarketType
 {
     None,
@@ -112,6 +120,8 @@ internal enum BxApiEndpoint
     MarketsSymbolTrades,
     HistoryMarketsSymbolTrades,
     HistoryBorrowInterest,
+    HistoryTransfer,
+    HistoryPerpetualSettlement,
     MarketsSymbolTick,
     MarketsSymbolCandle,
     Command,

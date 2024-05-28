@@ -43,6 +43,8 @@ internal static class Constants
         { BxApiEndpoint.MarketsSymbolTrades, new Endpoint("/markets/{symbol}/trades", "/v1", false) },
         { BxApiEndpoint.HistoryMarketsSymbolTrades, new Endpoint("/history/markets/{symbol}/trades", "/v1", false) },
         { BxApiEndpoint.HistoryBorrowInterest, new Endpoint("/history/borrow-interest", "/v1", true) },
+        { BxApiEndpoint.HistoryTransfer, new Endpoint("/history/transfer", "/v1", true) },
+        { BxApiEndpoint.HistoryPerpetualSettlement, new Endpoint("/history/perpetual-settlement", "/v1", true) },
         { BxApiEndpoint.MarketsSymbolTick, new Endpoint("/markets/{symbol}/tick", "/v1", false) },
         { BxApiEndpoint.MarketsSymbolCandle, new Endpoint("/markets/{symbol}/candle", "/v1", false) },
         { BxApiEndpoint.Command, new Endpoint("/command", "/v2", true) },

@@ -38,7 +38,39 @@ public static partial class Resources
 
         return httpClient.Get<List<BorrowInterest>>(bxPath);
     }
-    
-    // TODO: Add /history/transfer
-    // https://api.exchange.bullish.com/docs/api/rest/trading-api/v2/#get-/history/transfer
+
+    /// <summary>
+    /// Get historical transfers.
+    /// </summary>
+    /// <param name="tradingAccountId">Trading Account ID</param>
+    /// <param name="toTimestamp">End datetime of window,</param>
+    /// <param name="transferStatus">Status of the transfer request. Defaults to Close</param>
+    /// <param name="assetSymbol">Asset symbol of the transfer request</param>
+    /// <param name="pageSize">The number of candles to return 5, 25, 50, 100, default value is 25</param>
+    /// <param name="pageLink">Get the results for the next or previous page</param>
+    /// <param name="requestId">Unique identifier of the transfer request</param>
+    /// <param name="fromTimestamp">Start datetime of window,</param>
+    public static Task<BxHttpResponse<List<Transfer>>> GetTransfers(this BxHttpClient httpClient,
+        string tradingAccountId,
+        DateTime fromTimestamp, 
+        DateTime toTimestamp,
+        TransferStatus transferStatus = TransferStatus.Closed,
+        string requestId = "",
+        string assetSymbol = "",
+        int pageSize = 25,
+        BxPageLinks.PageLink? pageLink = null)
+    {
+        var bxPath = new EndpointPathBuilder(BxApiEndpoint.HistoryTransfer)
+            .AddPagination(pageSize, useMetaData: true)
+            .AddPageLink(pageLink ?? BxPageLinks.PageLink.Empty)
+            .AddQueryParam("tradingAccountId", tradingAccountId)
+            .AddQueryParam("status", transferStatus)
+            .AddQueryParam("requestId", requestId)
+            .AddQueryParam("assetSymbol", assetSymbol)
+            .AddQueryParam(DateTimeFilter.GreaterThanOrEqual(fromTimestamp))
+            .AddQueryParam(DateTimeFilter.LessThanOrEqual(toTimestamp))
+            .Build();
+
+        return httpClient.Get<List<Transfer>>(bxPath);
+    }
 }
