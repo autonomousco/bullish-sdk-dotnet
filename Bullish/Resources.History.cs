@@ -38,6 +38,35 @@ public static partial class Resources
 
         return httpClient.Get<List<BorrowInterest>>(bxPath);
     }
+    
+    /// <summary>
+    /// Get historical perpetual settlement.
+    /// </summary>
+    /// <param name="tradingAccountId">Trading Account ID</param>
+    /// <param name="toTimestamp">End datetime of window,</param>
+    /// <param name="fromTimestamp">Start datetime of window,</param>
+    /// <param name="symbol">Asset symbol of the transfer request</param>
+    /// <param name="pageSize">The number of candles to return 5, 25, 50, 100, default value is 25</param>
+    /// <param name="pageLink">Get the results for the next or previous page</param>
+    public static Task<BxHttpResponse<List<Settlement>>> GetPerpetualSettlements(this BxHttpClient httpClient,
+        string tradingAccountId,
+        string symbol,
+        DateTime fromTimestamp, 
+        DateTime toTimestamp,
+        int pageSize = 25,
+        BxPageLinks.PageLink? pageLink = null)
+    {
+        var bxPath = new EndpointPathBuilder(BxApiEndpoint.HistoryPerpetualSettlement)
+            .AddPagination(pageSize, useMetaData: true)
+            .AddPageLink(pageLink ?? BxPageLinks.PageLink.Empty)
+            .AddQueryParam("tradingAccountId", tradingAccountId)
+            .AddQueryParam("symbol", symbol)
+            .AddQueryParam(DateTimeFilter.GreaterThanOrEqual(fromTimestamp, "settlementDatetime"))
+            .AddQueryParam(DateTimeFilter.LessThanOrEqual(toTimestamp, "settlementDatetime"))
+            .Build();
+
+        return httpClient.Get<List<Settlement>>(bxPath);
+    }
 
     /// <summary>
     /// Get historical transfers.
