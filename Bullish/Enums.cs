@@ -105,6 +105,7 @@ internal enum BxApiEndpoint
     TradesTradeId,
     Assets,
     AssetsSymbol,
+    DerivativesPositions,
     Markets,
     MarketsSymbol,
     MarketsSymbolOrderBookHybrid,

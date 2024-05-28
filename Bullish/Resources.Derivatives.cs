@@ -13,7 +13,7 @@ public static partial class Resources
     /// <returns></returns>
     public static Task<BxHttpResponse<List<Position>>> GetPositions(this BxHttpClient httpClient, string tradingAccountId, string symbol = "")
     {
-        var bxPath = new EndpointPathBuilder(BxApiEndpoint.Assets)
+        var bxPath = new EndpointPathBuilder(BxApiEndpoint.DerivativesPositions)
             .AddQueryParam("tradingAccountId", tradingAccountId)
             .AddQueryParam("symbol", symbol)
             .Build();

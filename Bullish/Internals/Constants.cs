@@ -22,6 +22,7 @@ internal static class Constants
         { BxApiEndpoint.AccountsAsset, new Endpoint("/accounts/asset", "/v1", true) },
         { BxApiEndpoint.AccountsAssetSymbol, new Endpoint("/accounts/asset/{symbol}", "/v1", true) },
         { BxApiEndpoint.AccountsTradingAccounts, new Endpoint("/accounts/trading-accounts", "/v1", true) },
+        { BxApiEndpoint.DerivativesPositions, new Endpoint("/derivatives-positions", "/v1", true) },
         { BxApiEndpoint.Orders, new Endpoint("/orders", "/v2", true) },
         { BxApiEndpoint.OrdersOrderId, new Endpoint("/orders/{orderId}", "/v2", true) },
         { BxApiEndpoint.AmmInstructions, new Endpoint("/amm-instructions", "/v2", true) },
