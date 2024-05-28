@@ -360,12 +360,16 @@ public sealed class BxHttpClient
         // The response did not return a success StatusCode, try to parse the error
         try
         {
+            if (string.IsNullOrWhiteSpace(json))
+                return BxHttpResponse<TResult>.Failure(BxHttpError.Error(response.StatusCode, response.ReasonPhrase ?? "Unknown"));
+            
             var bxHttpError = Extensions.Deserialize<BxHttpError>(json) ?? BxHttpError.Error("Unknown error");
-            return BxHttpResponse<TResult>.Failure(bxHttpError);
+                return BxHttpResponse<TResult>.Failure(bxHttpError);
+            
         }
         catch (Exception ex)
         {
-            return BxHttpResponse<TResult>.Failure(BxHttpError.Error(response.StatusCode, $"Error{ex.Message}, JSON:{json}"));
+            return BxHttpResponse<TResult>.Failure(BxHttpError.Error(response.StatusCode, $"Error:{ex.Message}, JSON:{json}"));
         }
     }
 
