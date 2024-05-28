@@ -45,6 +45,18 @@ var order = await bxHttpClient.GetOrder("1234567890", tradingAccount.TradingAcco
 ```
 
 ## Version History
+#### Version 1.2.0 - May 28, 2024
+- Added get Derivatives Positions
+- Added get Historical Account Transfers
+- Added get Historical Hourly Perpetual Settlements
+- Update get Asset Account to support Trading ID
+- Added Post Only to OrderType
+- Added Perpetual to MarketType
+- Updated get AMM Instruction to use Instruction ID
+- Added get Trading Account
+- Added new fields to Asset, Market, Order, Tick and Trade
+- Improved error handling when HTTP response content is empty
+---
 #### Version 1.1.4 - Feb 6, 2024
 - Removed legacy BxNonce code to fix invalid nonce error
 - Exposed Time and Nonce GET requests
